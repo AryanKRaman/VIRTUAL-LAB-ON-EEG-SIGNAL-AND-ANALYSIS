@@ -1,0 +1,4649 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Virtual EEG Signal Processing Laboratory</title><style>
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.55 "Segoe UI",system-ui,sans-serif;background:#f3f5f9;color:#1c2333}
+header{background:#12305c;color:#fff;padding:18px 24px;position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:6px 20px;align-items:center}
+header h1{font-size:20px;margin:0}header p{margin:0;opacity:.75;flex:1}
+.badge{padding:3px 12px;border-radius:12px;font-size:13px}.badge.off{background:#8a3b3b}.badge.on{background:#1f7a4d}
+main{max-width:1100px;margin:20px auto;padding:0 14px;display:grid;gap:16px}
+.card{background:#fff;border:1px solid #dde3ee;border-radius:10px;padding:18px 22px}
+h2{margin:0 0 10px;font-size:18px;color:#12305c}h3{margin:12px 0 4px;font-size:15px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0}
+button,.btn{font:inherit;padding:7px 14px;border:1px solid #9fb0cc;background:#f6f8fc;border-radius:6px;cursor:pointer}
+button:hover,.btn:hover{background:#e6edf9}
+button.primary{background:#1f5fbf;border-color:#1f5fbf;color:#fff}button.primary:hover{background:#184c99}
+button.active{background:#12305c;color:#fff;border-color:#12305c}
+input,select{font:inherit;padding:5px 8px;border:1px solid #9fb0cc;border-radius:6px;width:110px}select{width:auto}
+label{display:flex;gap:6px;align-items:center;font-size:14px}
+.plot{width:100%;height:230px;display:block;border:1px solid #e1e6f0;border-radius:6px;background:#fff;cursor:grab}
+.plot.big{height:330px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.stat{background:#f3f6fc;border-radius:8px;padding:8px 12px}.stat b{display:block;font-size:17px;color:#12305c}.stat span{font-size:12px;color:#5c6780}
+.note{background:#fff7e0;border-left:4px solid #e0a800;padding:8px 12px;margin:8px 0;border-radius:4px}
+.explain{background:#eef4ff;border-left:4px solid #1f5fbf;padding:10px 14px;border-radius:4px}
+.muted{color:#5c6780;font-size:14px}.eq{font-size:20px;font-family:"Cambria Math",Georgia,serif;text-align:center}
+table{border-collapse:collapse;width:100%;margin:8px 0}th,td{border:1px solid #dde3ee;padding:6px 10px;text-align:left}th{background:#f0f3fa}
+td:not(:first-child),#cmp th:not(:first-child){text-align:right}
+.flow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-weight:600}.flow span,.diagram div{background:#e6edf9;border:1px solid #9fb0cc;border-radius:8px;padding:8px 16px}
+.diagram{display:flex;flex-direction:column;align-items:center;gap:2px}.diagram div{min-width:260px;text-align:center;font-weight:600}
+.diagram div.hl{background:#12305c;color:#fff}.diagram i{font-style:normal;color:#1f5fbf;font-size:18px;line-height:1}
+.guide{border:2px solid #1f5fbf;background:#f4f8ff}
+.steps{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:8px;counter-reset:s}
+.steps li{counter-increment:s;display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:#fff;border:1px solid #dde3ee;border-radius:8px;padding:10px 14px}
+.steps li::before{content:counter(s);flex:none;width:28px;height:28px;border-radius:50%;background:#9fb0cc;color:#fff;font-weight:700;display:grid;place-items:center}
+.steps li div{flex:1;min-width:220px}.steps li span{display:block;font-size:13px;color:#5c6780}
+.steps li.done{background:#f0faf4;border-color:#9fd3b5}.steps li.done::before{content:"\2713";background:#1f7a4d}
+.steps li.now{border-color:#1f5fbf;box-shadow:0 0 0 3px rgba(31,95,191,.18)}.steps li.now::before{background:#1f5fbf}
+.why{background:#eef4ff;border-left:4px solid #1f5fbf;border-radius:4px;padding:10px 14px;margin:12px 0}
+.why summary{cursor:pointer;font-weight:700;color:#12305c}.why ul{margin:8px 0 4px;padding-left:20px}.why p{margin:8px 0}
+.warn{background:#fdecec;border-left:4px solid #c0392b;padding:8px 12px;margin:8px 0;border-radius:4px}
+.tip{background:#f0faf4;border-left:4px solid #1f7a4d;padding:8px 12px;margin:8px 0;border-radius:4px}
+#bandTbl td.bar,#bandTbl th.bar{text-align:left;min-width:150px}
+.bar i{display:block;height:12px;background:#1f5fbf;border-radius:3px;min-width:1px}
+.ref td,.ref th{vertical-align:top}.ref td:not(:first-child),.ref th:not(:first-child){text-align:left}
+.ind{list-style:none;padding:0;margin:8px 0;display:grid;gap:6px}.ind li{padding:8px 12px;border-radius:6px;background:#f3f6fc;border-left:4px solid #9fb0cc}
+.ind li.ok{border-color:#1f7a4d;background:#f0faf4}.ind li.flag{border-color:#e0a800;background:#fff7e0}
+.ref{font-size:14px}
+[id^=sec-],#guide{scroll-margin-top:90px}
+@media(max-width:720px){.two{grid-template-columns:1fr}}
+
+</style></head><body>
+<header><h1>Virtual EEG Signal Processing Laboratory</h1><p>Signals &amp; Systems Virtual Lab</p>
+<span id="status" class="badge off">No data loaded</span></header>
+<main>
+<section class="card guide" id="guide"><h2>Quick Start Guide: follow these steps in order</h2>
+<p class="muted">New here? Do the steps one by one. Each step turns green when you finish it, and the blue one is what to do next.</p>
+<ol class="steps" id="steps">
+<li data-s="reset"><div><b>Reset the signal</b><span>Clear any old data so you start from a clean state.</span></div><button data-go="btnReset">Reset</button></li>
+<li data-s="load"><div><b>Load the sample signal</b><span>Use the built-in demo EEG, or upload your own CSV and type its sampling frequency in section 2.</span></div><button data-go="btnLoad" class="primary">Load Sample EEG</button></li>
+<li data-s="fft"><div><b>Perform the Fourier Transform (FFT)</b><span>The raw waveform mixes many rhythms. The FFT separates them so you can see which frequencies are present. <a href="#sec-fft">Why is this needed?</a></span></div><button data-go="btnFFT" class="primary">Perform FFT</button></li>
+<li data-s="filter"><div><b>Pick a frequency band and apply a digital filter</b><span>Choose Delta, Theta, Alpha, Beta or Gamma (<a href="#sec-bands">what do they mean?</a>) and keep only that band (<a href="#sec-filter">why filter?</a>).</span></div><button data-go="btnFilter" class="primary">Apply Filter</button></li>
+<li data-s="energy"><div><b>Calculate the signal energy</b><span>See how much energy the signal and each band carry. <a href="#sec-energy">How is it calculated?</a></span></div><button data-go="btnEnergy" class="primary">Calculate Energy</button></li>
+<li data-s="check"><div><b>Check the abnormality indicators</b><span>Learn how faults show up in EEG and test the loaded signal. <a href="#sec-fault">Read more</a></span></div><button data-go="btnIndicators" class="primary">Check Indicators</button></li>
+</ol></section>
+
+<section class="card"><h2>1. Introduction / Theory</h2>
+<p><b>Electroencephalography (EEG)</b> measures electrical activity from the scalp using electrodes. The measured EEG is a time-varying electrical signal that can be digitised and processed.</p>
+<div class="note">This Virtual Lab uses prerecorded/sample EEG data because physical EEG acquisition hardware is not available. It does not measure the user's brain activity.</div>
+<div class="note">This simulation is for educational purposes and must not be used for medical diagnosis.</div>
+<div class="learn"><button data-x="eeg">Learn more: EEG</button><button data-x="sampling">Sampling</button><button data-x="fft">FFT</button><button data-x="filter">Filter</button></div>
+<div id="explain" class="explain" hidden></div></section>
+
+<section class="card"><h2>2. EEG Signal Acquisition</h2>
+<div class="flow"><span>Sample EEG Dataset</span>→<span>Digital EEG Signal x[n]</span></div>
+<div class="tip"><b>Recommended order:</b> click <b>Reset</b> first, then <b>Load Sample EEG</b>. The sample is synthetic demo data, not a real recording.</div>
+<div class="row"><button id="btnReset">1. Reset</button><button id="btnLoad" class="primary">2. Load Sample EEG</button>
+<label class="btn">Upload my CSV<input id="fileIn" type="file" accept=".csv,.txt" hidden></label></div>
+<div class="row"><label>Sampling frequency of my recording (Hz) <input id="fsIn" type="number" value="256" min="1"></label>
+<label><input id="forceFs" type="checkbox" style="width:auto"> Always use this value (ignore the file's own time column / fs line)</label></div>
+<details class="why"><summary>How should my CSV file look?</summary><ul>
+<li>One column of amplitude values in microvolts (µV), one sample per row, <b>or</b> two columns: time in seconds, then amplitude.</li>
+<li>Lines starting with <code>#</code> are comments. A line such as <code># fs=256</code> sets the sampling frequency.</li>
+<li>If the file has no fs line and no time column, the value typed above is used. At least 64 samples are needed.</li>
+<li>Sampling frequency means how many samples were recorded per second. Typical EEG: 128, 256 or 512 Hz. A wrong value shifts every frequency in the results.</li></ul></details>
+<p id="dsLabel" class="muted">Input: Sample/Pre-recorded EEG Signal (none loaded)</p>
+<div id="stats" class="stats"></div></section>
+
+<section class="card"><h2>3. Original EEG Signal — Time Domain</h2>
+<div class="row"><button id="btnTime">Show Time Domain</button><button data-reset="pT">Reset zoom</button><span class="muted">Scroll to zoom, drag to pan</span></div>
+<canvas id="pT" class="plot big"></canvas></section>
+
+<section class="card"><h2>4. Sampling</h2>
+<p class="eq">x[n] = x(nT<sub>s</sub>), &nbsp; T<sub>s</sub> = 1 / f<sub>s</sub></p>
+<p>x(t): continuous-time EEG; x[n]: discrete-time EEG; T<sub>s</sub>: sampling interval; f<sub>s</sub>: sampling frequency.</p>
+<p id="samplingInfo" class="muted">Load data to see the actual sampling parameters.</p></section>
+
+<section class="card" id="sec-fft"><h2>5. FFT / Frequency-Domain Analysis</h2>
+<div class="tip"><b>Next step:</b> after loading the signal, click <b>Perform FFT</b> to see which frequencies it contains.</div>
+<details class="why" open><summary>Why do we need the Fourier Transform?</summary>
+<p>The EEG waveform in section 3 looks like a messy wiggle because it is many brain rhythms added together. By eye you cannot tell how much of it is slow (delta) or fast (beta). The Fourier Transform rewrites the signal as a sum of simple sine waves and tells you the strength of each frequency.</p>
+<p class="eq" style="font-size:17px">X[k] = &Sigma; x[n] e<sup>&minus;j2&pi;kn/N</sup>, &nbsp; frequency of bin k = k &middot; f<sub>s</sub> / N</p>
+<ul><li><b>Find the dominant rhythm:</b> a tall peak near 10 Hz means strong alpha activity.</li>
+<li><b>Spot noise:</b> a sharp peak at 50 Hz is mains hum, and broad high-frequency content is usually muscle noise.</li>
+<li><b>Choose filter cutoffs</b> sensibly (section 7).</li>
+<li><b>Measure band energy</b> (section 11) and detect abnormal slowing (section 12).</li>
+<li><b>Why the FFT and not the plain DFT?</b> For N = 4096 samples the DFT needs about 16.7 million multiplications. The FFT needs about N&middot;log<sub>2</sub>N = 49,000, roughly 340 times fewer.</li></ul>
+<p><b>How to read the graph:</b> x-axis = frequency in Hz, y-axis = how strong that frequency is (µV). Taller peak = stronger rhythm. This lab removes the average value, applies a Hann window and zero-pads to a power of two before the FFT.</p></details>
+<div class="row"><button id="btnFFT" class="primary">Perform FFT</button><button data-reset="pS">Reset zoom</button></div>
+<h3>EEG Frequency Spectrum</h3><canvas id="pS" class="plot big"></canvas>
+<p class="muted">The Fast Fourier Transform (FFT) converts the discrete-time EEG signal from the time domain into its frequency-domain representation, allowing the frequency components of the signal to be analyzed.</p></section>
+
+<section class="card" id="sec-bands"><h2>6. EEG Frequency Bands</h2>
+<details class="why" open><summary>Why are there frequency bands, and what do they indicate?</summary>
+<p>Brain cells fire in groups, and groups that fire together create rhythmic voltage waves. Different brain states (deep sleep, relaxed rest, concentration) produce rhythms in different frequency ranges. Early researchers, starting with Hans Berger in the 1920s, named these rhythms with Greek letters. Splitting the spectrum into bands turns a complicated signal into a few numbers that can be compared between people, states and time.</p></details>
+<table class="ref"><tr><th>Band</th><th>Frequency</th><th>Usually linked with (healthy)</th><th>When it may be abnormal</th></tr>
+<tr><td><b>Delta</b></td><td>0.5–4 Hz</td><td>Deep sleep in adults; normal and strong in infants.</td><td>Dominant in an awake adult (diffuse slowing), or slow waves confined to one area (focal slowing). Can relate to brain injury, tumour, stroke, encephalopathy or sedatives.</td></tr>
+<tr><td><b>Theta</b></td><td>4–8 Hz</td><td>Drowsiness, light sleep, daydreaming, memory processing; common in children.</td><td>Excess theta in an awake adult suggests slowing. Seen after head injury, in some dementias and with certain drugs.</td></tr>
+<tr><td><b>Alpha</b></td><td>8–13 Hz</td><td>Relaxed wakefulness with eyes closed; strongest at the back of the head; fades when eyes open.</td><td>Missing, much weaker on one side, or slowed below 8 Hz in an awake adult.</td></tr>
+<tr><td><b>Beta</b></td><td>13–30 Hz</td><td>Alert thinking, focus, active concentration.</td><td>Excess diffuse beta is typical of sedative drugs such as benzodiazepines. Muscle tension also creates fast activity that mimics it.</td></tr>
+<tr><td><b>Gamma</b></td><td>&gt;30 Hz</td><td>Higher-level processing and combining information; mainly studied in research.</td><td>On the scalp it is mostly muscle or electrical noise, so it is hard to interpret clinically.</td></tr></table>
+<p class="muted">Commonly used approximate ranges; boundaries vary by convention. Which band is normal depends on age, whether the person is awake or asleep, eyes open or closed, and which electrode is used. A band on its own is not a diagnosis; specialists look at patterns across the whole recording.</p>
+<div class="row bands"></div><p id="bandInfo"></p></section>
+
+<section class="card" id="sec-filter"><h2>7. EEG Digital Filtering</h2>
+<div class="tip"><b>Next step:</b> pick a band below (for example Alpha), then click <b>Apply Filter</b>.</div>
+<details class="why" open><summary>What is digital filtering and why is it needed?</summary>
+<p>A digital filter is a small algorithm that works on the sampled numbers x[n] and produces a new signal y[n]. It <b>passes</b> the frequencies you want and <b>blocks</b> the ones you do not.</p>
+<ul><li><b>EEG is tiny and noisy.</b> It is only microvolts, so it is easily polluted: slow electrode drift (&lt;0.5 Hz), eye blinks (about 0.5–4 Hz), muscle activity (&gt;30 Hz) and mains hum (50 Hz in India).</li>
+<li><b>To study one rhythm.</b> A band-pass filter keeps only, say, alpha (8–13 Hz) so you can look at that rhythm alone.</li>
+<li><b>To make later analysis reliable.</b> Removing noise first stops it from distorting band energy and abnormality checks.</li></ul>
+<table class="ref"><tr><th>Type</th><th>Keeps</th><th>Typical EEG use</th></tr>
+<tr><td>Low-pass</td><td>Below the cutoff</td><td>Remove muscle noise and high-frequency hiss.</td></tr>
+<tr><td>High-pass</td><td>Above the cutoff</td><td>Remove slow baseline drift (for example above 0.5 Hz).</td></tr>
+<tr><td>Band-pass</td><td>Between two cutoffs</td><td>Isolate one band such as alpha or beta.</td></tr>
+<tr><td>Notch (not in this lab)</td><td>Everything except a narrow gap</td><td>Remove 50 Hz mains hum.</td></tr></table></details>
+<div class="row"><label>Filter type <select id="ftype"><option value="bp">Band-pass</option><option value="lp">Low-pass</option><option value="hp">High-pass</option></select></label>
+<label>Lower cutoff (Hz) <input id="lo" type="number" step="0.1" value="8"></label>
+<label>Upper cutoff (Hz) <input id="hi" type="number" step="0.1" value="13"></label></div>
+<div class="row bands"></div>
+<div class="row"><button id="btnFilter" class="primary">Apply Filter</button></div>
+<p class="muted">Implementation: Butterworth-type biquad cascades (4th order per edge), applied forward and backward (zero phase). y[n] = H{x[n]}. Gamma is set to 30–80 Hz.</p></section>
+
+<section class="card"><h2>8. Filtered EEG Signal</h2>
+<h3>Filtered EEG Signal — Time Domain</h3><canvas id="pF" class="plot big"></canvas>
+<h3>Filtered EEG Frequency Spectrum</h3><canvas id="pFS" class="plot big"></canvas></section>
+
+<section class="card"><h2>9. Before / After Comparison</h2>
+<div class="two"><div><h3>Original EEG</h3><canvas id="cT1" class="plot"></canvas></div><div><h3>Filtered EEG</h3><canvas id="cT2" class="plot"></canvas></div></div>
+<table id="cmp"><tr><th>Parameter</th><th>Original EEG</th><th>Filtered EEG</th></tr></table></section>
+
+<section class="card"><h2>10. Original vs Filtered Frequency Spectrum</h2>
+<div class="two"><div><h3>Original Spectrum</h3><canvas id="cS1" class="plot"></canvas></div><div><h3>Filtered Spectrum</h3><canvas id="cS2" class="plot"></canvas></div></div></section>
+
+<section class="card" id="sec-energy"><h2>11. Signal Energy Calculation</h2>
+<details class="why" open><summary>How do we calculate the energy of an EEG signal?</summary>
+<p>Energy measures how strong the signal is overall: bigger swings mean more energy. For a sampled signal, square every sample (so negatives count too), add them up, and multiply by the sampling interval.</p>
+<p class="eq" style="font-size:18px">E = &Sigma; x²[n] &middot; T<sub>s</sub> &nbsp; (µV²·s)</p>
+<p class="eq" style="font-size:16px">Average power P = E / T = (1/N) &Sigma; x²[n] &nbsp;&nbsp;|&nbsp;&nbsp; RMS = &radic;P</p>
+<ul><li><b>Energy in a band:</b> by Parseval's theorem, energy in time equals energy in frequency, so you can add up |X[k]|² only over the FFT bins inside a band, for example 8–13 Hz for alpha.</li>
+<li><b>Relative energy (%)</b> = band energy ÷ total energy. It shows which rhythm dominates, whatever the recording's overall amplitude.</li>
+<li>The average (DC) value is removed first, as in the FFT.</li></ul></details>
+<div class="row"><button id="btnEnergy" class="primary">Calculate Energy</button><span class="muted">Works on the loaded signal. If you have applied a filter, its energy is compared too.</span></div>
+<div id="energyStats" class="stats"></div>
+<h3>Energy in each EEG band</h3>
+<table id="bandTbl"><tr><th>Band</th><th>Range</th><th>Energy (µV²·s)</th><th>% of total</th><th class="bar">Share</th></tr></table>
+<p id="energyNote" class="muted">Load a signal and click Calculate Energy.</p></section>
+
+<section class="card" id="sec-fault"><h2>12. Detecting Faults in the Brain from the Signal</h2>
+<div class="warn"><b>Important:</b> this is a learning tool. A single recording or a few numbers cannot diagnose a brain disorder. Doctors (neurologists) read multi-channel EEG, compare left with right, and consider age, medicines and symptoms. Never use this page to judge your own or anyone's health.</div>
+<h3>What do specialists look for?</h3>
+<table class="ref"><tr><th>Pattern in the signal</th><th>How it looks</th><th>Why it matters</th></tr>
+<tr><td><b>Excess slow waves while awake</b></td><td>Large, slow waves. In the spectrum, most power sits at 0.5–8 Hz.</td><td>Normal in sleep or drowsiness. Persistent slowing in an awake adult can point to widespread brain dysfunction. Slowing in one region can point to a local problem such as injury or stroke.</td></tr>
+<tr><td><b>Missing or weak alpha</b></td><td>No clear peak at 8–13 Hz when the eyes are closed and relaxed.</td><td>Can be normal in some people. It can also accompany brain dysfunction or a poor recording.</td></tr>
+<tr><td><b>Spikes and sharp waves</b></td><td>Sudden, narrow, high-amplitude transients that stand out from the background.</td><td>Associated with a tendency towards epileptic seizures.</td></tr>
+<tr><td><b>Rhythmic, high-amplitude bursts</b></td><td>Regular repeating waves, for example the 3 Hz spike-and-wave pattern, that start and stop abruptly.</td><td>Typical of seizure activity.</td></tr>
+<tr><td><b>Left–right asymmetry</b></td><td>One side is lower in amplitude or slower than the other (needs several channels).</td><td>May suggest a one-sided problem.</td></tr>
+<tr><td><b>Very flat, very low amplitude</b></td><td>Almost no voltage variation.</td><td>Can mean severe suppression of brain activity, but is far more often a loose or disconnected electrode.</td></tr></table>
+<h3>Rule out artifacts first</h3>
+<div class="why" style="margin-top:6px"><p>Many "abnormal-looking" signals are not from the brain at all:</p><ul>
+<li><b>Eye blinks:</b> large slow bumps, strongest at the front of the head (look like delta).</li>
+<li><b>Muscle activity (jaw clench, frowning):</b> broad, fast, noisy content above 20–30 Hz.</li>
+<li><b>Mains hum:</b> a sharp peak at 50 Hz (60 Hz in some countries).</li>
+<li><b>Electrode problems:</b> sudden jumps, drift or a flat line.</li></ul>
+<p>The signal-processing workflow is therefore: <b>1.</b> clean the signal with filters, <b>2.</b> run the FFT, <b>3.</b> measure band energy, <b>4.</b> compare with what is expected for that state, <b>5.</b> have a specialist review any unusual pattern.</p></div>
+<h3>Try it on the loaded signal</h3>
+<div class="row"><button id="btnIndicators" class="primary">Check Indicators</button></div>
+<ul id="indicators" class="ind"><li>Load a signal, then click Check Indicators.</li></ul>
+<p class="muted">These checks are simple educational rules of thumb and are not clinical findings.</p></section>
+
+<section class="card"><h2>13. Interactive Controls</h2><p>Dataset: Reset, Load Sample EEG, Upload CSV and sampling frequency (section 2). Analysis: Show Time Domain, Perform FFT (sections 3, 5). Filtering: type, band, cutoffs, Apply Filter (section 7). Energy: Calculate Energy (section 11). Abnormality checks: Check Indicators (section 12). Audio playback is intentionally not provided: EEG is not naturally audible.</p></section>
+
+<section class="card"><h2>14. Signal Flow Diagram</h2><div class="diagram">
+<div>Sample EEG Dataset</div><i>↓</i><div>Digital EEG Signal x[n]</div><i>↓</i><div>Time-Domain Analysis</div><i>↓</i><div>FFT</div><i>↓</i><div>Frequency Spectrum</div><i>↓</i><div class="hl">Digital Filter</div><i>↓</i><div>Filtered EEG y[n]</div><i>↓</i><div>FFT of Filtered Signal</div><i>↓</i><div>Comparison &amp; Analysis</div><i>↓</i><div>Band Energy &amp; Abnormality Indicators</div><i>↓</i><div class="hl">Result</div></div></section>
+
+<section class="card"><h2>15. Observations</h2><p id="obs" class="muted">Apply a filter to generate observations.</p></section>
+<section class="card"><h2>16. Result</h2><p>The Virtual EEG Signal Processing Laboratory successfully demonstrates the representation and processing of a prerecorded EEG signal in the time and frequency domains. FFT is used for frequency analysis, digital filtering is used to isolate selected EEG frequency bands, and band energy summarises how the signal's strength is spread across those bands.</p></section>
+
+<section class="card"><h2>17. Procedure</h2><ol>
+<li>Open the Virtual EEG Laboratory.</li><li>Click Reset to clear any old signal.</li><li>Load the sample EEG dataset (or upload your CSV and enter its sampling frequency).</li><li>Observe the sampling frequency and signal duration.</li><li>Display the EEG signal in the time domain.</li><li>Observe amplitude versus time.</li><li>Perform FFT.</li><li>Observe the frequency spectrum.</li><li>Select an EEG frequency band.</li><li>Apply the digital band-pass filter.</li><li>Display the filtered EEG waveform.</li><li>Perform FFT on the filtered signal.</li><li>Compare the original and filtered frequency spectra.</li><li>Calculate the signal energy and the energy in each band.</li><li>Check the abnormality indicators and read why they are only educational.</li><li>Record observations.</li></ol></section>
+
+<section class="card"><h2>Key Concepts Demonstrated</h2><ul><li>EEG as a real-world signal</li><li>Sampling</li><li>Discrete-time signal</li><li>Time-domain representation</li><li>Frequency-domain representation</li><li>FFT</li><li>Digital filtering</li><li>Frequency-band analysis</li><li>Signal comparison</li><li>Signal energy and Parseval's theorem</li><li>Abnormal EEG patterns and artifacts</li></ul>
+<h3>Limitation</h3><div class="note">This Virtual Lab uses prerecorded EEG data instead of live EEG acquisition hardware. It demonstrates signal-processing concepts and is not a medical diagnostic system.</div></section>
+</main><script>
+// Same content as sample_eeg.csv, wrapped so it loads from file:// without a server.
+window.SAMPLE_EEG_CSV = `# SYNTHETIC EEG-LIKE DEMO DATA (not a real recording). Single channel, fs=256 Hz, 16 s.
+# fs=256
+time_s,amplitude_uV
+0.00000,-6.406
+0.00391,-0.337
+0.00781,2.160
+0.01172,2.267
+0.01562,3.526
+0.01953,7.180
+0.02344,10.384
+0.02734,9.159
+0.03125,5.029
+0.03516,2.077
+0.03906,1.809
+0.04297,2.483
+0.04688,0.119
+0.05078,-5.522
+0.05469,-12.206
+0.05859,-15.827
+0.06250,-15.734
+0.06641,-15.112
+0.07031,-16.761
+0.07422,-18.839
+0.07812,-18.329
+0.08203,-15.419
+0.08594,-13.518
+0.08984,-15.070
+0.09375,-16.105
+0.09766,-12.846
+0.10156,-5.501
+0.10547,0.500
+0.10938,2.198
+0.11328,2.488
+0.11719,5.425
+0.12109,10.205
+0.12500,11.896
+0.12891,7.739
+0.13281,1.800
+0.13672,-0.828
+0.14062,0.510
+0.14453,2.269
+0.14844,0.859
+0.15234,-2.272
+0.15625,-3.233
+0.16016,-1.673
+0.16406,-0.043
+0.16797,-1.782
+0.17188,-5.560
+0.17578,-7.467
+0.17969,-5.463
+0.18359,-2.117
+0.18750,-0.646
+0.19141,-0.636
+0.19531,0.725
+0.19922,5.264
+0.20312,10.648
+0.20703,12.803
+0.21094,10.873
+0.21484,8.775
+0.21875,9.381
+0.22266,11.823
+0.22656,12.869
+0.23047,10.746
+0.23438,7.536
+0.23828,5.567
+0.24219,4.484
+0.24609,1.450
+0.25000,-3.966
+0.25391,-8.940
+0.25781,-10.648
+0.26172,-9.456
+0.26562,-8.087
+0.26953,-7.587
+0.27344,-6.216
+0.27734,-2.888
+0.28125,0.894
+0.28516,2.803
+0.28906,1.519
+0.29297,-0.544
+0.29688,0.157
+0.30078,4.210
+0.30469,7.926
+0.30859,10.119
+0.31250,11.416
+0.31641,14.387
+0.32031,18.503
+0.32422,20.460
+0.32812,17.644
+0.33203,12.018
+0.33594,7.475
+0.33984,4.365
+0.34375,1.770
+0.34766,-2.628
+0.35156,-7.391
+0.35547,-9.215
+0.35938,-6.942
+0.36328,-3.866
+0.36719,-4.422
+0.37109,-7.128
+0.37500,-8.827
+0.37891,-6.585
+0.38281,-2.451
+0.38672,-0.863
+0.39062,-2.284
+0.39453,-3.686
+0.39844,-2.189
+0.40234,1.173
+0.40625,2.157
+0.41016,0.135
+0.41406,-2.604
+0.41797,-3.069
+0.42188,-1.069
+0.42578,0.540
+0.42969,-0.593
+0.43359,-3.775
+0.43750,-6.240
+0.44141,-7.210
+0.44531,-9.201
+0.44922,-13.285
+0.45312,-18.089
+0.45703,-19.572
+0.46094,-17.536
+0.46484,-15.828
+0.46875,-16.423
+0.47266,-17.022
+0.47656,-13.023
+0.48047,-5.336
+0.48438,0.761
+0.48828,1.319
+0.49219,-0.649
+0.49609,-1.525
+0.50000,0.230
+0.50391,1.052
+0.50781,-1.649
+0.51172,-5.547
+0.51562,-5.787
+0.51953,-2.876
+0.52344,0.699
+0.52734,1.158
+0.53125,-1.191
+0.53516,-3.463
+0.53906,-4.224
+0.54297,-5.849
+0.54688,-10.027
+0.55078,-15.732
+0.55469,-19.377
+0.55859,-18.991
+0.56250,-15.543
+0.56641,-14.115
+0.57031,-15.204
+0.57422,-16.729
+0.57812,-15.719
+0.58203,-12.096
+0.58594,-9.507
+0.58984,-9.161
+0.59375,-8.402
+0.59766,-5.111
+0.60156,-0.791
+0.60547,0.889
+0.60938,-1.189
+0.61328,-3.860
+0.61719,-5.181
+0.62109,-5.731
+0.62500,-7.203
+0.62891,-10.153
+0.63281,-12.187
+0.63672,-10.698
+0.64062,-7.064
+0.64453,-5.164
+0.64844,-6.649
+0.65234,-10.201
+0.65625,-12.365
+0.66016,-12.515
+0.66406,-12.377
+0.66797,-13.296
+0.67188,-14.175
+0.67578,-12.043
+0.67969,-5.516
+0.68359,2.091
+0.68750,6.522
+0.69141,6.833
+0.69531,6.751
+0.69922,8.526
+0.70312,9.867
+0.70703,7.527
+0.71094,1.791
+0.71484,-3.496
+0.71875,-4.824
+0.72266,-3.025
+0.72656,-2.110
+0.73047,-5.110
+0.73438,-8.632
+0.73828,-9.614
+0.74219,-8.752
+0.74609,-9.945
+0.75000,-14.317
+0.75391,-18.351
+0.75781,-18.108
+0.76172,-14.074
+0.76562,-10.430
+0.76953,-11.030
+0.77344,-12.742
+0.77734,-11.654
+0.78125,-7.474
+0.78516,-3.454
+0.78906,-2.110
+0.79297,-0.604
+0.79688,3.469
+0.80078,9.299
+0.80469,13.269
+0.80859,12.516
+0.81250,9.001
+0.81641,6.547
+0.82031,5.115
+0.82422,2.845
+0.82812,-1.618
+0.83203,-6.254
+0.83594,-6.809
+0.83984,-3.216
+0.84375,0.849
+0.84766,1.778
+0.85156,0.231
+0.85547,-0.050
+0.85938,2.423
+0.86328,4.257
+0.86719,2.024
+0.87109,-2.836
+0.87500,-5.894
+0.87891,-3.218
+0.88281,2.618
+0.88672,5.798
+0.89062,4.571
+0.89453,2.543
+0.89844,3.271
+0.90234,5.381
+0.90625,4.321
+0.91016,-1.074
+0.91406,-6.914
+0.91797,-9.274
+0.92188,-8.152
+0.92578,-8.016
+0.92969,-11.091
+0.93359,-13.974
+0.93750,-13.892
+0.94141,-12.285
+0.94531,-12.820
+0.94922,-16.358
+0.95312,-19.400
+0.95703,-18.377
+0.96094,-12.647
+0.96484,-7.006
+0.96875,-5.526
+0.97266,-6.664
+0.97656,-6.372
+0.98047,-2.548
+0.98438,1.346
+0.98828,1.659
+0.99219,-1.835
+0.99609,-3.435
+1.00000,-0.589
+1.00391,4.101
+1.00781,5.410
+1.01172,3.123
+1.01562,0.461
+1.01953,-1.316
+1.02344,-3.667
+1.02734,-9.043
+1.03125,-15.381
+1.03516,-19.375
+1.03906,-19.658
+1.04297,-18.182
+1.04688,-18.090
+1.05078,-18.970
+1.05469,-18.269
+1.05859,-14.397
+1.06250,-10.180
+1.06641,-9.115
+1.07031,-11.135
+1.07422,-12.289
+1.07812,-10.750
+1.08203,-7.685
+1.08594,-6.273
+1.08984,-7.676
+1.09375,-9.132
+1.09766,-7.471
+1.10156,-4.082
+1.10547,-3.263
+1.10938,-6.838
+1.11328,-11.383
+1.11719,-12.613
+1.12109,-10.872
+1.12500,-10.549
+1.12891,-13.376
+1.13281,-16.260
+1.13672,-17.198
+1.14062,-15.797
+1.14453,-14.554
+1.14844,-14.914
+1.15234,-15.408
+1.15625,-12.918
+1.16016,-7.792
+1.16406,-2.955
+1.16797,-0.198
+1.17188,0.992
+1.17578,3.057
+1.17969,6.663
+1.18359,9.092
+1.18750,7.808
+1.19141,3.986
+1.19531,-0.133
+1.19922,-1.314
+1.20312,-0.364
+1.20703,-1.375
+1.21094,-4.794
+1.21484,-7.224
+1.21875,-6.841
+1.22266,-6.425
+1.22656,-9.302
+1.23047,-15.337
+1.23438,-20.011
+1.23828,-20.314
+1.24219,-18.657
+1.24609,-18.517
+1.25000,-20.432
+1.25391,-20.585
+1.25781,-16.434
+1.26172,-10.401
+1.26562,-7.016
+1.26953,-6.029
+1.27344,-6.024
+1.27734,-4.269
+1.28125,0.002
+1.28516,3.564
+1.28906,5.043
+1.29297,5.249
+1.29688,6.219
+1.30078,7.341
+1.30469,6.958
+1.30859,4.411
+1.31250,0.237
+1.31641,-2.352
+1.32031,-2.199
+1.32422,-2.162
+1.32812,-4.447
+1.33203,-8.359
+1.33594,-9.858
+1.33984,-7.993
+1.34375,-6.447
+1.34766,-7.710
+1.35156,-10.745
+1.35547,-11.799
+1.35938,-8.718
+1.36328,-4.107
+1.36719,-1.396
+1.37109,-0.658
+1.37500,0.722
+1.37891,4.172
+1.38281,8.125
+1.38672,8.987
+1.39062,5.918
+1.39453,2.066
+1.39844,0.169
+1.40234,-0.706
+1.40625,-2.371
+1.41016,-6.036
+1.41406,-9.051
+1.41797,-9.063
+1.42188,-7.040
+1.42578,-6.032
+1.42969,-8.110
+1.43359,-11.447
+1.43750,-12.170
+1.44141,-10.611
+1.44531,-8.778
+1.44922,-8.263
+1.45312,-7.264
+1.45703,-2.858
+1.46094,3.842
+1.46484,8.980
+1.46875,9.666
+1.47266,8.726
+1.47656,9.906
+1.48047,13.114
+1.48438,14.693
+1.48828,13.096
+1.49219,10.829
+1.49609,10.149
+1.50000,11.643
+1.50391,11.415
+1.50781,6.954
+1.51172,0.202
+1.51562,-4.214
+1.51953,-5.185
+1.52344,-5.627
+1.52734,-8.604
+1.53125,-12.804
+1.53516,-14.039
+1.53906,-11.161
+1.54297,-7.184
+1.54688,-6.223
+1.55078,-8.338
+1.55469,-9.287
+1.55859,-7.558
+1.56250,-4.676
+1.56641,-3.718
+1.57031,-4.530
+1.57422,-4.316
+1.57812,-0.601
+1.58203,5.101
+1.58594,7.969
+1.58984,5.710
+1.59375,1.744
+1.59766,-1.071
+1.60156,-1.470
+1.60547,-3.175
+1.60938,-8.283
+1.61328,-13.233
+1.61719,-14.930
+1.62109,-12.733
+1.62500,-10.128
+1.62891,-10.396
+1.63281,-12.022
+1.63672,-11.909
+1.64062,-8.173
+1.64453,-4.082
+1.64844,-2.458
+1.65234,-2.801
+1.65625,-0.827
+1.66016,3.312
+1.66406,6.679
+1.66797,6.589
+1.67188,4.391
+1.67578,3.995
+1.67969,6.574
+1.68359,8.085
+1.68750,5.170
+1.69141,0.341
+1.69531,-2.023
+1.69922,-0.584
+1.70312,0.319
+1.70703,-3.989
+1.71094,-12.385
+1.71484,-19.324
+1.71875,-21.801
+1.72266,-22.242
+1.72656,-24.061
+1.73047,-27.745
+1.73438,-28.672
+1.73828,-25.288
+1.74219,-19.214
+1.74609,-15.192
+1.75000,-13.860
+1.75391,-12.497
+1.75781,-9.473
+1.76172,-5.346
+1.76562,-3.232
+1.76953,-4.763
+1.77344,-6.539
+1.77734,-5.258
+1.78125,-0.995
+1.78516,2.237
+1.78906,1.670
+1.79297,-1.350
+1.79688,-3.043
+1.80078,-2.668
+1.80469,-4.258
+1.80859,-10.249
+1.81250,-17.664
+1.81641,-21.772
+1.82031,-20.623
+1.82422,-18.044
+1.82812,-17.574
+1.83203,-19.621
+1.83594,-19.703
+1.83984,-16.010
+1.84375,-12.141
+1.84766,-10.261
+1.85156,-8.868
+1.85547,-5.175
+1.85938,0.330
+1.86328,4.222
+1.86719,4.458
+1.87109,1.643
+1.87500,-0.392
+1.87891,0.216
+1.88281,1.519
+1.88672,-0.347
+1.89062,-5.165
+1.89453,-9.765
+1.89844,-10.312
+1.90234,-9.049
+1.90625,-9.392
+1.91016,-13.149
+1.91406,-18.033
+1.91797,-20.385
+1.92188,-20.246
+1.92578,-21.371
+1.92969,-25.270
+1.93359,-27.405
+1.93750,-23.357
+1.94141,-14.844
+1.94531,-6.788
+1.94922,-2.049
+1.95312,1.673
+1.95703,7.972
+1.96094,15.115
+1.96484,18.814
+1.96875,16.368
+1.97266,12.244
+1.97656,11.244
+1.98047,12.829
+1.98438,13.777
+1.98828,11.227
+1.99219,6.188
+1.99609,3.191
+2.00000,2.382
+2.00391,0.799
+2.00781,-3.263
+2.01172,-9.352
+2.01562,-12.845
+2.01953,-11.767
+2.02344,-9.232
+2.02734,-9.671
+2.03125,-12.567
+2.03516,-13.301
+2.03906,-8.844
+2.04297,-2.669
+2.04688,-0.542
+2.05078,-2.125
+2.05469,-1.958
+2.05859,3.426
+2.06250,12.499
+2.06641,17.484
+2.07031,16.468
+2.07422,13.483
+2.07812,12.591
+2.08203,12.520
+2.08594,9.299
+2.08984,2.316
+2.09375,-4.412
+2.09766,-6.949
+2.10156,-5.667
+2.10547,-4.516
+2.10938,-5.661
+2.11328,-6.599
+2.11719,-4.182
+2.12109,0.427
+2.12500,2.967
+2.12891,1.280
+2.13281,-2.332
+2.13672,-1.995
+2.14062,3.602
+2.14453,9.886
+2.14844,13.469
+2.15234,14.970
+2.15625,18.089
+2.16016,25.142
+2.16406,30.727
+2.16797,29.734
+2.17188,23.173
+2.17578,17.532
+2.17969,15.715
+2.18359,15.106
+2.18750,11.025
+2.19141,3.656
+2.19531,-2.346
+2.19922,-4.282
+2.20312,-4.172
+2.20703,-6.438
+2.21094,-11.248
+2.21484,-14.493
+2.21875,-13.485
+2.22266,-10.183
+2.22656,-8.350
+2.23047,-8.663
+2.23438,-8.729
+2.23828,-5.704
+2.24219,-0.776
+2.24609,3.276
+2.25000,4.707
+2.25391,5.935
+2.25781,10.079
+2.26172,16.158
+2.26562,20.459
+2.26953,20.845
+2.27344,19.703
+2.27734,19.679
+2.28125,20.577
+2.28516,18.088
+2.28906,11.442
+2.29297,2.787
+2.29688,-3.730
+2.30078,-6.792
+2.30469,-8.984
+2.30859,-12.197
+2.31250,-14.934
+2.31641,-13.883
+2.32031,-9.178
+2.32422,-5.200
+2.32812,-4.491
+2.33203,-5.404
+2.33594,-3.497
+2.33984,1.459
+2.34375,5.782
+2.34766,6.338
+2.35156,4.760
+2.35547,5.340
+2.35938,7.712
+2.36328,9.942
+2.36719,8.895
+2.37109,4.823
+2.37500,1.492
+2.37891,-0.043
+2.38281,-1.964
+2.38672,-6.888
+2.39062,-14.493
+2.39453,-21.206
+2.39844,-24.724
+2.40234,-26.350
+2.40625,-28.932
+2.41016,-32.593
+2.41406,-35.387
+2.41797,-34.019
+2.42188,-29.419
+2.42578,-25.203
+2.42969,-23.123
+2.43359,-20.486
+2.43750,-14.938
+2.44141,-7.227
+2.44531,-1.854
+2.44922,-1.288
+2.45312,-3.945
+2.45703,-4.852
+2.46094,-2.758
+2.46484,-1.186
+2.46875,-2.649
+2.47266,-4.810
+2.47656,-4.695
+2.48047,-2.634
+2.48438,-2.112
+2.48828,-6.089
+2.49219,-13.218
+2.49609,-20.162
+2.50000,-24.234
+2.50391,-26.286
+2.50781,-29.447
+2.51172,-32.827
+2.51562,-33.365
+2.51953,-30.070
+2.52344,-24.945
+2.52734,-21.284
+2.53125,-20.723
+2.53516,-19.784
+2.53906,-16.891
+2.54297,-13.599
+2.54688,-12.493
+2.55078,-13.642
+2.55469,-14.509
+2.55859,-12.977
+2.56250,-10.055
+2.56641,-9.161
+2.57031,-11.721
+2.57422,-15.405
+2.57812,-16.641
+2.58203,-16.639
+2.58594,-18.576
+2.58984,-23.076
+2.59375,-26.764
+2.59766,-27.268
+2.60156,-24.705
+2.60547,-23.213
+2.60938,-25.274
+2.61328,-28.341
+2.61719,-28.891
+2.62109,-25.283
+2.62500,-20.702
+2.62891,-17.754
+2.63281,-15.649
+2.63672,-11.140
+2.64062,-3.374
+2.64453,2.882
+2.64844,3.905
+2.65234,0.435
+2.65625,-1.901
+2.66016,-1.206
+2.66406,-1.002
+2.66797,-4.093
+2.67188,-9.808
+2.67578,-13.534
+2.67969,-12.774
+2.68359,-11.226
+2.68750,-12.748
+2.69141,-17.207
+2.69531,-21.118
+2.69922,-22.337
+2.70312,-22.572
+2.70703,-24.455
+2.71094,-27.595
+2.71484,-28.647
+2.71875,-26.439
+2.72266,-21.891
+2.72656,-17.588
+2.73047,-14.664
+2.73438,-11.967
+2.73828,-7.569
+2.74219,-3.441
+2.74609,-1.381
+2.75000,-2.232
+2.75391,-2.873
+2.75781,-1.234
+2.76172,1.693
+2.76562,1.842
+2.76953,-1.255
+2.77344,-6.042
+2.77734,-8.831
+2.78125,-9.217
+2.78516,-9.869
+2.78906,-12.605
+2.79297,-16.428
+2.79688,-17.045
+2.80078,-14.194
+2.80469,-11.144
+2.80859,-10.773
+2.81250,-11.832
+2.81641,-11.496
+2.82031,-8.465
+2.82422,-5.918
+2.82812,-6.321
+2.83203,-8.800
+2.83594,-8.305
+2.83984,-2.440
+2.84375,4.520
+2.84766,7.804
+2.85156,6.613
+2.85547,5.175
+2.85938,6.642
+2.86328,7.208
+2.86719,2.586
+2.87109,-4.928
+2.87500,-10.699
+2.87891,-11.448
+2.88281,-9.969
+2.88672,-11.226
+2.89062,-15.103
+2.89453,-17.298
+2.89844,-15.789
+2.90234,-13.226
+2.90625,-12.943
+2.91016,-15.738
+2.91406,-18.198
+2.91797,-16.521
+2.92188,-11.995
+2.92578,-7.614
+2.92969,-5.015
+2.93359,-2.973
+2.93750,0.716
+2.94141,5.786
+2.94531,8.707
+2.94922,8.095
+2.95312,5.860
+2.95703,5.141
+2.96094,6.780
+2.96484,7.073
+2.96875,3.439
+2.97266,-1.453
+2.97656,-3.722
+2.98047,-2.951
+2.98438,-3.283
+2.98828,-8.130
+2.99219,-14.960
+2.99609,-18.808
+3.00000,-17.614
+3.00391,-14.620
+3.00781,-13.640
+3.01172,-14.170
+3.01562,-13.850
+3.01953,-11.243
+3.02344,-8.551
+3.02734,-8.548
+3.03125,-9.939
+3.03516,-10.091
+3.03906,-6.947
+3.04297,-1.629
+3.04688,1.350
+3.05078,1.704
+3.05469,2.290
+3.05859,4.912
+3.06250,8.032
+3.06641,8.036
+3.07031,3.878
+3.07422,-0.702
+3.07812,-2.306
+3.08203,-1.292
+3.08594,-0.871
+3.08984,-2.570
+3.09375,-3.153
+3.09766,-0.130
+3.10156,5.088
+3.10547,8.354
+3.10938,7.268
+3.11328,5.781
+3.11719,7.576
+3.12109,11.941
+3.12500,16.285
+3.12891,17.941
+3.13281,19.148
+3.13672,21.950
+3.14062,26.455
+3.14453,29.068
+3.14844,27.924
+3.15234,25.791
+3.15625,25.109
+3.16016,26.631
+3.16406,28.485
+3.16797,27.979
+3.17188,25.618
+3.17578,24.248
+3.17969,24.898
+3.18359,24.972
+3.18750,22.491
+3.19141,18.036
+3.19531,14.866
+3.19922,15.014
+3.20312,17.049
+3.20703,18.895
+3.21094,19.578
+3.21484,21.049
+3.21875,24.822
+3.22266,29.144
+3.22656,31.269
+3.23047,30.491
+3.23438,29.340
+3.23828,30.550
+3.24219,33.648
+3.24609,35.191
+3.25000,33.762
+3.25391,31.241
+3.25781,31.433
+3.26172,33.766
+3.26562,34.035
+3.26953,30.006
+3.27344,24.216
+3.27734,20.515
+3.28125,19.971
+3.28516,18.629
+3.28906,14.980
+3.29297,10.963
+3.29688,9.896
+3.30078,11.984
+3.30469,13.598
+3.30859,11.984
+3.31250,8.150
+3.31641,6.515
+3.32031,8.709
+3.32422,11.317
+3.32812,11.222
+3.33203,10.206
+3.33594,10.634
+3.33984,13.229
+3.34375,14.520
+3.34766,11.516
+3.35156,5.934
+3.35547,1.802
+3.35938,1.252
+3.36328,1.443
+3.36719,-0.788
+3.37109,-5.007
+3.37500,-7.706
+3.37891,-6.781
+3.38281,-5.670
+3.38672,-8.322
+3.39062,-13.668
+3.39453,-17.812
+3.39844,-17.799
+3.40234,-14.536
+3.40625,-12.194
+3.41016,-11.562
+3.41406,-9.987
+3.41797,-5.294
+3.42188,0.676
+3.42578,4.242
+3.42969,4.157
+3.43359,3.350
+3.43750,4.330
+3.44141,6.782
+3.44531,7.028
+3.44922,4.195
+3.45312,0.184
+3.45703,-0.438
+3.46094,0.879
+3.46484,0.450
+3.46875,-2.938
+3.47266,-7.899
+3.47656,-10.114
+3.48047,-10.156
+3.48438,-10.789
+3.48828,-13.101
+3.49219,-15.604
+3.49609,-14.877
+3.50000,-12.313
+3.50391,-11.173
+3.50781,-12.867
+3.51172,-14.461
+3.51562,-13.559
+3.51953,-10.115
+3.52344,-6.895
+3.52734,-5.877
+3.53125,-6.193
+3.53516,-4.599
+3.53906,0.456
+3.54297,5.374
+3.54688,6.313
+3.55078,2.205
+3.55469,-3.043
+3.55859,-5.466
+3.56250,-5.539
+3.56641,-7.001
+3.57031,-10.674
+3.57422,-14.014
+3.57812,-13.178
+3.58203,-9.262
+3.58594,-5.802
+3.58984,-5.735
+3.59375,-7.176
+3.59766,-7.584
+3.60156,-6.552
+3.60547,-6.134
+3.60938,-7.572
+3.61328,-7.491
+3.61719,-3.689
+3.62109,3.057
+3.62500,8.088
+3.62891,9.109
+3.63281,8.863
+3.63672,10.205
+3.64062,13.523
+3.64453,14.449
+3.64844,10.734
+3.65234,5.636
+3.65625,2.851
+3.66016,3.695
+3.66406,4.177
+3.66797,1.181
+3.67188,-4.375
+3.67578,-7.888
+3.67969,-7.521
+3.68359,-6.337
+3.68750,-6.980
+3.69141,-9.442
+3.69531,-9.874
+3.69922,-7.086
+3.70312,-3.039
+3.70703,-2.913
+3.71094,-5.959
+3.71484,-8.600
+3.71875,-7.741
+3.72266,-3.541
+3.72656,-0.170
+3.73047,-0.548
+3.73438,-0.434
+3.73828,2.740
+3.74219,7.664
+3.74609,9.998
+3.75000,7.612
+3.75391,4.257
+3.75781,3.822
+3.76172,3.672
+3.76562,0.425
+3.76953,-5.770
+3.77344,-11.366
+3.77734,-11.922
+3.78125,-8.724
+3.78516,-7.063
+3.78906,-8.063
+3.79297,-9.496
+3.79688,-8.012
+3.80078,-4.455
+3.80469,-3.302
+3.80859,-5.889
+3.81250,-9.238
+3.81641,-8.939
+3.82031,-4.502
+3.82422,0.613
+3.82812,2.723
+3.83203,1.606
+3.83594,1.383
+3.83984,4.036
+3.84375,7.027
+3.84766,6.493
+3.85156,2.337
+3.85547,-1.653
+3.85938,-2.515
+3.86328,-1.851
+3.86719,-4.350
+3.87109,-9.688
+3.87500,-14.531
+3.87891,-15.636
+3.88281,-15.158
+3.88672,-16.166
+3.89062,-18.734
+3.89453,-19.219
+3.89844,-15.134
+3.90234,-7.914
+3.90625,-2.573
+3.91016,-1.213
+3.91406,-2.007
+3.91797,-0.657
+3.92188,2.021
+3.92578,3.035
+3.92969,0.441
+3.93359,-2.072
+3.93750,-0.913
+3.94141,2.953
+3.94531,5.431
+3.94922,4.316
+3.95312,1.769
+3.95703,0.602
+3.96094,0.307
+3.96484,-2.174
+3.96875,-9.246
+3.97266,-16.956
+3.97656,-20.077
+3.98047,-19.538
+3.98438,-18.719
+3.98828,-20.010
+3.99219,-21.484
+3.99609,-19.542
+4.00000,-14.451
+4.00391,-9.653
+4.00781,-8.141
+4.01172,-8.623
+4.01562,-8.066
+4.01953,-4.347
+4.02344,-0.146
+4.02734,1.672
+4.03125,1.166
+4.03516,1.177
+4.03906,3.931
+4.04297,6.858
+4.04688,5.775
+4.05078,1.326
+4.05469,-2.207
+4.05859,-1.770
+4.06250,0.505
+4.06641,0.193
+4.07031,-3.632
+4.07422,-7.347
+4.07812,-8.025
+4.08203,-7.082
+4.08594,-8.120
+4.08984,-12.251
+4.09375,-14.536
+4.09766,-11.737
+4.10156,-5.635
+4.10547,-0.474
+4.10938,1.994
+4.11328,5.036
+4.11719,10.436
+4.12109,16.265
+4.12500,17.602
+4.12891,12.908
+4.13281,7.139
+4.13672,4.984
+4.14062,6.802
+4.14453,7.475
+4.14844,4.660
+4.15234,1.074
+4.15625,-0.010
+4.16016,2.307
+4.16406,3.675
+4.16797,0.045
+4.17188,-5.674
+4.17578,-9.711
+4.17969,-10.601
+4.18359,-10.553
+4.18750,-10.929
+4.19141,-11.667
+4.19531,-10.247
+4.19922,-6.345
+4.20312,-2.331
+4.20703,0.342
+4.21094,1.632
+4.21484,3.978
+4.21875,7.918
+4.22266,12.663
+4.22656,15.721
+4.23047,15.994
+4.23438,14.890
+4.23828,15.257
+4.24219,16.889
+4.24609,16.997
+4.25000,13.013
+4.25391,7.019
+4.25781,3.632
+4.26172,3.258
+4.26562,2.956
+4.26953,0.873
+4.27344,-1.568
+4.27734,-0.958
+4.28125,2.481
+4.28516,3.912
+4.28906,0.604
+4.29297,-3.684
+4.29688,-4.385
+4.30078,-0.392
+4.30469,4.786
+4.30859,7.810
+4.31250,9.983
+4.31641,13.961
+4.32031,19.790
+4.32422,23.600
+4.32812,23.817
+4.33203,20.593
+4.33594,18.011
+4.33984,18.107
+4.34375,18.438
+4.34766,15.907
+4.35156,11.172
+4.35547,7.437
+4.35938,7.747
+4.36328,9.507
+4.36719,7.688
+4.37109,2.618
+4.37500,-1.175
+4.37891,-1.026
+4.38281,1.216
+4.38672,0.904
+4.39062,-2.477
+4.39453,-3.722
+4.39844,-0.372
+4.40234,5.092
+4.40625,7.798
+4.41016,7.273
+4.41406,7.088
+4.41797,10.547
+4.42188,16.770
+4.42578,21.053
+4.42969,21.975
+4.43359,20.618
+4.43750,20.273
+4.44141,20.731
+4.44531,19.705
+4.44922,14.092
+4.45312,6.624
+4.45703,1.347
+4.46094,-0.389
+4.46484,-0.845
+4.46875,-3.173
+4.47266,-7.194
+4.47656,-8.198
+4.48047,-5.281
+4.48438,-2.436
+4.48828,-3.056
+4.49219,-6.217
+4.49609,-7.841
+4.50000,-4.973
+4.50391,-1.121
+4.50781,0.844
+4.51172,2.307
+4.51562,5.997
+4.51953,11.977
+4.52344,16.981
+4.52734,18.385
+4.53125,16.629
+4.53516,14.328
+4.53906,12.880
+4.54297,11.138
+4.54688,7.404
+4.55078,1.387
+4.55469,-3.473
+4.55859,-4.880
+4.56250,-4.966
+4.56641,-6.483
+4.57031,-10.378
+4.57422,-14.695
+4.57812,-16.125
+4.58203,-14.110
+4.58594,-12.545
+4.58984,-12.588
+4.59375,-11.775
+4.59766,-8.157
+4.60156,-2.262
+4.60547,2.368
+4.60938,3.138
+4.61328,3.039
+4.61719,5.759
+4.62109,10.602
+4.62500,13.225
+4.62891,11.202
+4.63281,8.045
+4.63672,8.469
+4.64062,11.485
+4.64453,12.556
+4.64844,8.235
+4.65234,0.729
+4.65625,-5.016
+4.66016,-8.299
+4.66406,-10.749
+4.66797,-15.404
+4.67188,-20.896
+4.67578,-23.166
+4.67969,-20.380
+4.68359,-15.242
+4.68750,-11.527
+4.69141,-10.361
+4.69531,-9.502
+4.69922,-6.568
+4.70312,-2.910
+4.70703,-1.304
+4.71094,-1.483
+4.71484,-1.206
+4.71875,3.749
+4.72266,10.283
+4.72656,13.562
+4.73047,12.737
+4.73438,11.155
+4.73828,11.269
+4.74219,11.992
+4.74609,10.003
+4.75000,4.380
+4.75391,-0.976
+4.75781,-2.413
+4.76172,-1.317
+4.76562,-1.383
+4.76953,-5.218
+4.77344,-9.488
+4.77734,-11.098
+4.78125,-10.489
+4.78516,-9.899
+4.78906,-10.530
+4.79297,-9.806
+4.79688,-5.616
+4.80078,1.435
+4.80469,7.421
+4.80859,9.847
+4.81250,9.952
+4.81641,11.204
+4.82031,14.313
+4.82422,16.533
+4.82812,14.400
+4.83203,9.725
+4.83594,7.103
+4.83984,7.994
+4.84375,10.306
+4.84766,9.168
+4.85156,3.444
+4.85547,-2.452
+4.85938,-4.604
+4.86328,-5.415
+4.86719,-8.941
+4.87109,-15.717
+4.87500,-20.412
+4.87891,-20.215
+4.88281,-16.576
+4.88672,-13.348
+4.89062,-12.919
+4.89453,-10.334
+4.89844,-4.504
+4.90234,1.963
+4.90625,4.838
+4.91016,4.394
+4.91406,3.986
+4.91797,6.342
+4.92188,10.212
+4.92578,12.253
+4.92969,9.671
+4.93359,6.604
+4.93750,5.462
+4.94141,4.935
+4.94531,2.498
+4.94922,-2.844
+4.95312,-8.481
+4.95703,-11.531
+4.96094,-11.522
+4.96484,-12.010
+4.96875,-15.873
+4.97266,-20.086
+4.97656,-20.616
+4.98047,-17.570
+4.98438,-14.421
+4.98828,-14.274
+4.99219,-15.610
+4.99609,-13.435
+5.00000,-6.797
+5.00391,0.469
+5.00781,3.836
+5.01172,4.352
+5.01562,5.811
+5.01953,9.342
+5.02344,10.883
+5.02734,7.251
+5.03125,0.737
+5.03516,-3.884
+5.03906,-4.270
+5.04297,-3.950
+5.04688,-6.355
+5.05078,-10.446
+5.05469,-12.721
+5.05859,-11.754
+5.06250,-10.399
+5.06641,-11.895
+5.07031,-16.441
+5.07422,-20.320
+5.07812,-20.539
+5.08203,-17.106
+5.08594,-14.057
+5.08984,-13.072
+5.09375,-11.889
+5.09766,-7.226
+5.10156,-0.237
+5.10547,4.960
+5.10938,5.022
+5.11328,3.501
+5.11719,4.912
+5.12109,8.876
+5.12500,11.402
+5.12891,9.442
+5.13281,4.758
+5.13672,2.002
+5.14062,1.312
+5.14453,-0.035
+5.14844,-5.010
+5.15234,-11.278
+5.15625,-14.287
+5.16016,-13.929
+5.16406,-13.676
+5.16797,-16.400
+5.17188,-19.856
+5.17578,-20.696
+5.17969,-18.315
+5.18359,-16.418
+5.18750,-17.763
+5.19141,-20.071
+5.19531,-19.698
+5.19922,-14.353
+5.20312,-7.813
+5.20703,-3.284
+5.21094,-1.169
+5.21484,1.818
+5.21875,7.124
+5.22266,11.172
+5.22656,10.142
+5.23047,4.463
+5.23438,-1.034
+5.23828,-3.685
+5.24219,-4.810
+5.24609,-8.000
+5.25000,-13.107
+5.25391,-16.967
+5.25781,-16.455
+5.26172,-13.546
+5.26562,-13.169
+5.26953,-17.067
+5.27344,-21.417
+5.27734,-21.954
+5.28125,-18.767
+5.28516,-16.101
+5.28906,-16.310
+5.29297,-17.265
+5.29688,-16.516
+5.30078,-13.492
+5.30469,-9.968
+5.30859,-8.427
+5.31250,-8.406
+5.31641,-7.621
+5.32031,-6.455
+5.32422,-6.436
+5.32812,-8.775
+5.33203,-11.939
+5.33594,-13.614
+5.33984,-14.410
+5.34375,-16.127
+5.34766,-21.774
+5.35156,-29.549
+5.35547,-35.114
+5.35938,-36.372
+5.36328,-35.117
+5.36719,-34.691
+5.37109,-35.518
+5.37500,-33.721
+5.37891,-28.570
+5.38281,-22.623
+5.38672,-19.983
+5.39062,-20.786
+5.39453,-21.190
+5.39844,-18.972
+5.40234,-15.617
+5.40625,-14.056
+5.41016,-14.641
+5.41406,-13.823
+5.41797,-9.811
+5.42188,-5.415
+5.42578,-4.578
+5.42969,-7.505
+5.43359,-11.841
+5.43750,-14.762
+5.44141,-16.881
+5.44531,-20.001
+5.44922,-24.471
+5.45312,-28.765
+5.45703,-29.529
+5.46094,-27.905
+5.46484,-26.928
+5.46875,-28.368
+5.47266,-30.559
+5.47656,-29.790
+5.48047,-25.927
+5.48438,-21.838
+5.48828,-21.282
+5.49219,-22.476
+5.49609,-21.409
+5.50000,-17.060
+5.50391,-12.648
+5.50781,-11.842
+5.51172,-13.929
+5.51562,-15.210
+5.51953,-12.772
+5.52344,-9.624
+5.52734,-9.470
+5.53125,-12.051
+5.53516,-13.967
+5.53906,-13.465
+5.54297,-13.405
+5.54688,-16.164
+5.55078,-21.523
+5.55469,-25.352
+5.55859,-26.352
+5.56250,-25.772
+5.56641,-26.630
+5.57031,-28.142
+5.57422,-27.217
+5.57812,-22.784
+5.58203,-15.704
+5.58594,-11.323
+5.58984,-9.471
+5.59375,-8.602
+5.59766,-6.490
+5.60156,-3.075
+5.60547,-1.281
+5.60938,-2.980
+5.61328,-5.474
+5.61719,-5.706
+5.62109,-2.801
+5.62500,-0.399
+5.62891,-1.713
+5.63281,-5.209
+5.63672,-7.415
+5.64062,-7.945
+5.64453,-10.194
+5.64844,-16.191
+5.65234,-23.057
+5.65625,-25.418
+5.66016,-23.952
+5.66406,-22.306
+5.66797,-24.127
+5.67188,-27.211
+5.67578,-27.201
+5.67969,-22.637
+5.68359,-18.117
+5.68750,-15.749
+5.69141,-15.348
+5.69531,-12.735
+5.69922,-7.245
+5.70312,-2.731
+5.70703,-2.224
+5.71094,-4.521
+5.71484,-6.228
+5.71875,-6.089
+5.72266,-5.523
+5.72656,-7.291
+5.73047,-11.262
+5.73438,-13.946
+5.73828,-12.984
+5.74219,-10.312
+5.74609,-10.574
+5.75000,-13.229
+5.75391,-16.019
+5.75781,-16.361
+5.76172,-15.383
+5.76562,-15.884
+5.76953,-18.883
+5.77344,-21.470
+5.77734,-20.106
+5.78125,-15.816
+5.78516,-11.592
+5.78906,-9.244
+5.79297,-6.735
+5.79688,-2.600
+5.80078,2.253
+5.80469,4.394
+5.80859,1.947
+5.81250,-1.769
+5.81641,-3.580
+5.82031,-2.388
+5.82422,-1.676
+5.82812,-3.529
+5.83203,-7.173
+5.83594,-9.921
+5.83984,-10.495
+5.84375,-10.759
+5.84766,-13.562
+5.85156,-18.072
+5.85547,-20.518
+5.85938,-18.726
+5.86328,-15.506
+5.86719,-14.906
+5.87109,-18.187
+5.87500,-20.691
+5.87891,-18.611
+5.88281,-14.220
+5.88672,-11.955
+5.89062,-12.779
+5.89453,-13.018
+5.89844,-9.058
+5.90234,-2.424
+5.90625,2.457
+5.91016,2.221
+5.91406,-0.137
+5.91797,-0.471
+5.92188,0.004
+5.92578,-2.150
+5.92969,-8.274
+5.93359,-14.611
+5.93750,-16.881
+5.94141,-14.752
+5.94531,-13.941
+5.94922,-16.454
+5.95312,-19.207
+5.95703,-19.706
+5.96094,-17.173
+5.96484,-16.704
+5.96875,-20.326
+5.97266,-24.383
+5.97656,-24.430
+5.98047,-20.197
+5.98438,-16.124
+5.98828,-14.882
+5.99219,-14.417
+5.99609,-11.578
+6.00000,-6.305
+6.00391,-3.706
+6.00781,-6.612
+6.01172,-11.570
+6.01562,-13.690
+6.01953,-12.088
+6.02344,-10.447
+6.02734,-12.424
+6.03125,-16.560
+6.03516,-18.502
+6.03906,-17.291
+6.04297,-16.128
+6.04688,-18.342
+6.05078,-22.515
+6.05469,-25.001
+6.05859,-24.069
+6.06250,-22.007
+6.06641,-20.855
+6.07031,-20.949
+6.07422,-20.257
+6.07812,-17.262
+6.08203,-14.661
+6.08594,-13.890
+6.08984,-15.823
+6.09375,-17.439
+6.09766,-15.676
+6.10156,-11.230
+6.10547,-8.197
+6.10938,-8.551
+6.11328,-10.136
+6.11719,-9.826
+6.12109,-7.930
+6.12500,-7.944
+6.12891,-12.352
+6.13281,-19.025
+6.13672,-23.718
+6.14062,-24.869
+6.14453,-24.768
+6.14844,-25.109
+6.15234,-25.861
+6.15625,-24.939
+6.16016,-20.969
+6.16406,-17.222
+6.16797,-16.432
+6.17188,-18.191
+6.17578,-19.356
+6.17969,-16.516
+6.18359,-12.536
+6.18750,-9.905
+6.19141,-10.226
+6.19531,-10.395
+6.19922,-7.097
+6.20312,-2.261
+6.20703,-0.471
+6.21094,-3.500
+6.21484,-7.338
+6.21875,-7.372
+6.22266,-4.746
+6.22656,-4.314
+6.23047,-7.160
+6.23438,-10.342
+6.23828,-9.787
+6.24219,-8.045
+6.24609,-9.930
+6.25000,-16.371
+6.25391,-22.075
+6.25781,-23.085
+6.26172,-20.461
+6.26562,-17.743
+6.26953,-16.520
+6.27344,-15.098
+6.27734,-11.846
+6.28125,-8.028
+6.28516,-6.991
+6.28906,-9.063
+6.29297,-11.287
+6.29688,-11.667
+6.30078,-9.285
+6.30469,-7.238
+6.30859,-7.201
+6.31250,-8.636
+6.31641,-8.552
+6.32031,-6.168
+6.32422,-4.631
+6.32812,-7.211
+6.33203,-12.426
+6.33594,-16.384
+6.33984,-16.739
+6.34375,-16.461
+6.34766,-18.704
+6.35156,-22.055
+6.35547,-22.261
+6.35938,-17.942
+6.36328,-12.928
+6.36719,-11.067
+6.37109,-12.217
+6.37500,-11.562
+6.37891,-7.382
+6.38281,-2.774
+6.38672,-0.326
+6.39062,-1.219
+6.39453,-1.376
+6.39844,0.729
+6.40234,4.036
+6.40625,6.419
+6.41016,5.941
+6.41406,4.475
+6.41797,4.870
+6.42188,6.336
+6.42578,6.302
+6.42969,3.216
+6.43359,-0.067
+6.43750,-0.190
+6.44141,1.704
+6.44531,1.316
+6.44922,-3.117
+6.45312,-8.547
+6.45703,-10.949
+6.46094,-9.583
+6.46484,-8.674
+6.46875,-9.515
+6.47266,-9.522
+6.47656,-6.126
+6.48047,0.601
+6.48438,5.992
+6.48828,7.302
+6.49219,5.712
+6.49609,4.836
+6.50000,5.716
+6.50391,6.472
+6.50781,5.608
+6.51172,3.352
+6.51562,3.934
+6.51953,7.109
+6.52344,9.770
+6.52734,8.519
+6.53125,3.618
+6.53516,-0.639
+6.53906,-0.875
+6.54297,0.534
+6.54688,-0.775
+6.55078,-4.656
+6.55469,-7.318
+6.55859,-5.530
+6.56250,-1.587
+6.56641,0.069
+6.57031,-0.527
+6.57422,-0.749
+6.57812,3.028
+6.58203,8.598
+6.58594,12.290
+6.58984,12.013
+6.59375,11.109
+6.59766,13.286
+6.60156,17.143
+6.60547,19.286
+6.60938,17.009
+6.61328,12.208
+6.61719,9.071
+6.62109,8.258
+6.62500,6.940
+6.62891,2.907
+6.63281,-2.220
+6.63672,-4.077
+6.64062,-1.573
+6.64453,0.835
+6.64844,-0.720
+6.65234,-5.171
+6.65625,-7.230
+6.66016,-5.282
+6.66406,-2.951
+6.66797,-3.352
+6.67188,-5.240
+6.67578,-3.144
+6.67969,4.026
+6.68359,11.121
+6.68750,14.981
+6.69141,15.627
+6.69531,16.647
+6.69922,19.952
+6.70312,21.745
+6.70703,18.072
+6.71094,11.114
+6.71484,5.277
+6.71875,4.389
+6.72266,5.836
+6.72656,4.824
+6.73047,-0.312
+6.73438,-4.466
+6.73828,-5.305
+6.74219,-4.389
+6.74609,-5.359
+6.75000,-9.644
+6.75391,-12.879
+6.75781,-11.875
+6.76172,-8.029
+6.76562,-6.279
+6.76953,-7.257
+6.77344,-8.940
+6.77734,-8.032
+6.78125,-5.584
+6.78516,-4.430
+6.78906,-5.227
+6.79297,-5.232
+6.79688,-2.069
+6.80078,2.424
+6.80469,4.691
+6.80859,2.387
+6.81250,-2.655
+6.81641,-7.319
+6.82031,-10.482
+6.82422,-13.311
+6.82812,-18.523
+6.83203,-24.131
+6.83594,-26.305
+6.83984,-23.767
+6.84375,-19.377
+6.84766,-17.871
+6.85156,-19.095
+6.85547,-18.715
+6.85938,-15.479
+6.86328,-11.824
+6.86719,-12.115
+6.87109,-13.945
+6.87500,-13.429
+6.87891,-8.531
+6.88281,-1.849
+6.88672,1.938
+6.89062,3.273
+6.89453,4.885
+6.89844,9.320
+6.90234,12.615
+6.90625,11.749
+6.91016,6.520
+6.91406,0.094
+6.91797,-2.896
+6.92188,-3.937
+6.92578,-6.612
+6.92969,-12.816
+6.93359,-18.896
+6.93750,-22.045
+6.94141,-21.233
+6.94531,-20.641
+6.94922,-22.677
+6.95312,-24.575
+6.95703,-23.047
+6.96094,-17.682
+6.96484,-12.162
+6.96875,-10.113
+6.97266,-10.038
+6.97656,-8.582
+6.98047,-4.425
+6.98438,-0.445
+6.98828,0.244
+6.99219,-0.710
+6.99609,0.613
+7.00000,5.717
+7.00391,10.093
+7.00781,10.229
+7.01172,6.941
+7.01562,3.629
+7.01953,2.393
+7.02344,1.364
+7.02734,-2.873
+7.03125,-10.013
+7.03516,-14.845
+7.03906,-15.118
+7.04297,-12.360
+7.04688,-10.300
+7.05078,-9.741
+7.05469,-7.433
+7.05859,-1.251
+7.06250,5.594
+7.06641,8.686
+7.07031,6.973
+7.07422,5.451
+7.07812,8.029
+7.08203,12.638
+7.08594,15.168
+7.08984,14.714
+7.09375,13.970
+7.09766,15.563
+7.10156,18.153
+7.10547,17.707
+7.10938,13.003
+7.11328,6.613
+7.11719,2.869
+7.12109,1.106
+7.12500,-1.599
+7.12891,-6.760
+7.13281,-12.687
+7.13672,-15.525
+7.14062,-15.092
+7.14453,-14.966
+7.14844,-16.413
+7.15234,-17.230
+7.15625,-14.029
+7.16016,-6.029
+7.16406,2.162
+7.16797,7.475
+7.17188,9.849
+7.17578,13.332
+7.17969,18.260
+7.18359,21.422
+7.18750,20.381
+7.19141,16.630
+7.19531,14.221
+7.19922,15.262
+7.20312,16.751
+7.20703,15.795
+7.21094,12.756
+7.21484,10.252
+7.21875,10.291
+7.22266,10.974
+7.22656,8.618
+7.23047,2.164
+7.23438,-4.951
+7.23828,-8.725
+7.24219,-8.345
+7.24609,-7.334
+7.25000,-7.871
+7.25391,-8.029
+7.25781,-4.201
+7.26172,2.406
+7.26562,7.638
+7.26953,8.444
+7.27344,7.428
+7.27734,8.219
+7.28125,11.124
+7.28516,12.964
+7.28906,11.744
+7.29297,9.835
+7.29688,10.391
+7.30078,12.563
+7.30469,12.532
+7.30859,7.389
+7.31250,0.545
+7.31641,-3.582
+7.32031,-3.860
+7.32422,-4.034
+7.32812,-7.968
+7.33203,-13.260
+7.33594,-16.137
+7.33984,-15.440
+7.34375,-13.541
+7.34766,-14.520
+7.35156,-17.036
+7.35547,-16.644
+7.35938,-11.350
+7.36328,-4.541
+7.36719,0.041
+7.37109,2.639
+7.37500,7.358
+7.37891,15.150
+7.38281,21.528
+7.38672,21.552
+7.39062,16.819
+7.39453,12.384
+7.39844,11.341
+7.40234,11.364
+7.40625,8.623
+7.41016,3.556
+7.41406,-0.833
+7.41797,-1.267
+7.42188,-0.767
+7.42578,-2.230
+7.42969,-6.451
+7.43359,-11.427
+7.43750,-14.232
+7.44141,-14.112
+7.44531,-13.520
+7.44922,-14.341
+7.45312,-14.223
+7.45703,-10.796
+7.46094,-5.021
+7.46484,-0.760
+7.46875,0.144
+7.47266,-0.012
+7.47656,2.046
+7.48047,5.648
+7.48438,6.986
+7.48828,4.610
+7.49219,1.110
+7.49609,0.321
+7.50000,1.427
+7.50391,0.305
+7.50781,-4.952
+7.51172,-12.026
+7.51562,-15.897
+7.51953,-16.161
+7.52344,-15.234
+7.52734,-15.981
+7.53125,-18.296
+7.53516,-18.079
+7.53906,-14.608
+7.54297,-9.665
+7.54688,-7.160
+7.55078,-7.438
+7.55469,-7.567
+7.55859,-4.870
+7.56250,0.156
+7.56641,3.934
+7.57031,4.882
+7.57422,6.817
+7.57812,12.424
+7.58203,18.402
+7.58594,19.779
+7.58984,14.682
+7.59375,8.313
+7.59766,4.341
+7.60156,2.102
+7.60547,-2.635
+7.60938,-10.213
+7.61328,-17.670
+7.61719,-20.635
+7.62109,-19.991
+7.62500,-19.774
+7.62891,-22.452
+7.63281,-26.594
+7.63672,-27.393
+7.64062,-23.590
+7.64453,-19.552
+7.64844,-18.610
+7.65234,-19.008
+7.65625,-16.810
+7.66016,-9.945
+7.66406,-2.353
+7.66797,1.715
+7.67188,2.377
+7.67578,3.993
+7.67969,7.150
+7.68359,9.675
+7.68750,8.689
+7.69141,5.251
+7.69531,3.882
+7.69922,6.008
+7.70312,8.344
+7.70703,5.977
+7.71094,0.294
+7.71484,-4.179
+7.71875,-5.688
+7.72266,-6.584
+7.72656,-9.732
+7.73047,-14.329
+7.73438,-15.741
+7.73828,-11.730
+7.74219,-5.322
+7.74609,-0.933
+7.75000,0.340
+7.75391,1.558
+7.75781,5.517
+7.76172,10.524
+7.76562,12.757
+7.76953,11.262
+7.77344,8.740
+7.77734,9.957
+7.78125,14.465
+7.78516,17.337
+7.78906,16.095
+7.79297,12.181
+7.79688,8.794
+7.80078,7.537
+7.80469,5.487
+7.80859,-0.002
+7.81250,-6.772
+7.81641,-10.623
+7.82031,-10.774
+7.82422,-9.427
+7.82812,-9.953
+7.83203,-11.279
+7.83594,-10.536
+7.83984,-6.472
+7.84375,-2.033
+7.84766,0.321
+7.85156,1.924
+7.85547,5.287
+7.85938,11.597
+7.86328,17.877
+7.86719,20.654
+7.87109,20.504
+7.87500,20.659
+7.87891,22.004
+7.88281,23.007
+7.88672,20.724
+7.89062,15.937
+7.89453,11.551
+7.89844,10.023
+7.90234,9.757
+7.90625,8.081
+7.91016,4.040
+7.91406,-0.112
+7.91797,-2.894
+7.92188,-4.372
+7.92578,-7.089
+7.92969,-11.792
+7.93359,-14.896
+7.93750,-13.709
+7.94141,-9.041
+7.94531,-4.909
+7.94922,-2.876
+7.95312,-1.092
+7.95703,2.988
+7.96094,9.225
+7.96484,13.127
+7.96875,11.422
+7.97266,7.458
+7.97656,5.946
+7.98047,8.032
+7.98438,9.813
+7.98828,7.768
+7.99219,4.960
+7.99609,5.148
+8.00000,8.008
+8.00391,8.215
+8.00781,3.542
+8.01172,-3.077
+8.01562,-7.146
+8.01953,-6.298
+8.02344,-3.625
+8.02734,-3.056
+8.03125,-3.979
+8.03516,-3.809
+8.03906,-0.436
+8.04297,3.753
+8.04688,5.223
+8.05078,4.646
+8.05469,6.104
+8.05859,11.059
+8.06250,16.705
+8.06641,19.743
+8.07031,19.319
+8.07422,17.670
+8.07812,17.126
+8.08203,16.307
+8.08594,12.253
+8.08984,5.986
+8.09375,0.700
+8.09766,-2.510
+8.10156,-3.425
+8.10547,-5.355
+8.10938,-8.887
+8.11328,-11.528
+8.11719,-11.447
+8.12109,-10.312
+8.12500,-10.946
+8.12891,-14.602
+8.13281,-18.837
+8.13672,-19.325
+8.14062,-16.062
+8.14453,-11.114
+8.14844,-8.270
+8.15234,-6.471
+8.15625,-2.986
+8.16016,3.959
+8.16406,11.132
+8.16797,12.837
+8.17188,10.117
+8.17578,6.656
+8.17969,6.727
+8.18359,8.885
+8.18750,8.754
+8.19141,5.774
+8.19531,3.419
+8.19922,4.106
+8.20312,4.819
+8.20703,2.303
+8.21094,-2.845
+8.21484,-6.441
+8.21875,-4.900
+8.22266,-0.955
+8.22656,0.016
+8.23047,-2.067
+8.23438,-3.714
+8.23828,-1.707
+8.24219,2.914
+8.24609,5.455
+8.25000,4.178
+8.25391,2.348
+8.25781,4.892
+8.26172,10.998
+8.26562,15.831
+8.26953,16.085
+8.27344,13.672
+8.27734,12.961
+8.28125,14.683
+8.28516,14.364
+8.28906,8.923
+8.29297,0.829
+8.29688,-4.222
+8.30078,-4.213
+8.30469,-2.924
+8.30859,-3.565
+8.31250,-5.639
+8.31641,-4.475
+8.32031,0.109
+8.32422,5.387
+8.32812,6.364
+8.33203,4.819
+8.33594,4.407
+8.33984,8.039
+8.34375,12.157
+8.34766,13.106
+8.35156,11.965
+8.35547,13.157
+8.35938,18.554
+8.36328,24.425
+8.36719,26.413
+8.37109,23.796
+8.37500,21.178
+8.37891,21.189
+8.38281,22.189
+8.38672,20.206
+8.39062,14.536
+8.39453,8.768
+8.39844,6.007
+8.40234,5.724
+8.40625,3.935
+8.41016,-0.399
+8.41406,-4.374
+8.41797,-4.619
+8.42188,-1.440
+8.42578,1.074
+8.42969,0.970
+8.43359,1.080
+8.43750,3.849
+8.44141,8.295
+8.44531,11.064
+8.44922,9.623
+8.45312,7.215
+8.45703,7.545
+8.46094,10.661
+8.46484,12.518
+8.46875,10.585
+8.47266,8.008
+8.47656,8.524
+8.48047,12.580
+8.48438,15.570
+8.48828,13.222
+8.49219,8.047
+8.49609,4.943
+8.50000,4.039
+8.50391,2.250
+8.50781,-1.278
+8.51172,-3.844
+8.51562,-1.980
+8.51953,3.240
+8.52344,7.894
+8.52734,9.236
+8.53125,9.033
+8.53516,10.005
+8.53906,13.010
+8.54297,15.825
+8.54688,15.647
+8.55078,12.366
+8.55469,9.771
+8.55859,10.419
+8.56250,13.112
+8.56641,14.387
+8.57031,12.166
+8.57422,8.423
+8.57812,7.132
+8.58203,7.569
+8.58594,5.890
+8.58984,0.787
+8.59375,-5.057
+8.59766,-6.218
+8.60156,-3.744
+8.60547,-3.119
+8.60938,-6.638
+8.61328,-11.539
+8.61719,-13.006
+8.62109,-10.416
+8.62500,-7.927
+8.62891,-7.634
+8.63281,-6.583
+8.63672,-1.871
+8.64062,4.773
+8.64453,9.694
+8.64844,10.258
+8.65234,8.651
+8.65625,8.156
+8.66016,8.707
+8.66406,8.043
+8.66797,4.987
+8.67188,2.923
+8.67578,3.930
+8.67969,8.091
+8.68359,11.062
+8.68750,11.395
+8.69141,9.524
+8.69531,8.197
+8.69922,8.092
+8.70312,6.508
+8.70703,1.849
+8.71094,-4.020
+8.71484,-7.798
+8.71875,-7.135
+8.72266,-3.983
+8.72656,-1.917
+8.73047,-1.340
+8.73438,-0.690
+8.73828,2.196
+8.74219,5.197
+8.74609,6.079
+8.75000,3.045
+8.75391,-0.028
+8.75781,0.108
+8.76172,1.557
+8.76562,1.365
+8.76953,-3.042
+8.77344,-7.578
+8.77734,-9.433
+8.78125,-9.348
+8.78516,-10.031
+8.78906,-13.917
+8.79297,-16.574
+8.79688,-15.166
+8.80078,-10.613
+8.80469,-7.470
+8.80859,-9.144
+8.81250,-12.659
+8.81641,-14.245
+8.82031,-13.548
+8.82422,-12.584
+8.82812,-13.825
+8.83203,-15.055
+8.83594,-12.512
+8.83984,-6.167
+8.84375,1.048
+8.84766,4.961
+8.85156,5.277
+8.85547,4.924
+8.85938,6.336
+8.86328,6.991
+8.86719,4.420
+8.87109,-1.802
+8.87500,-7.719
+8.87891,-8.997
+8.88281,-7.490
+8.88672,-7.077
+8.89062,-9.550
+8.89453,-11.404
+8.89844,-10.408
+8.90234,-8.544
+8.90625,-8.850
+8.91016,-11.941
+8.91406,-14.545
+8.91797,-14.558
+8.92188,-11.750
+8.92578,-9.113
+8.92969,-8.605
+8.93359,-7.886
+8.93750,-4.410
+8.94141,0.265
+8.94531,2.744
+8.94922,1.713
+8.95312,-0.098
+8.95703,0.955
+8.96094,4.433
+8.96484,7.442
+8.96875,7.084
+8.97266,4.670
+8.97656,3.947
+8.98047,4.662
+8.98438,4.166
+8.98828,1.059
+8.99219,-1.729
+8.99609,-1.042
+9.00000,4.110
+9.00391,10.287
+9.00781,13.870
+9.01172,15.169
+9.01562,17.825
+9.01953,22.780
+9.02344,27.796
+9.02734,29.760
+9.03125,29.402
+9.03516,30.608
+9.03906,35.591
+9.04297,41.599
+9.04688,44.439
+9.05078,43.991
+9.05469,43.737
+9.05859,46.060
+9.06250,49.425
+9.06641,49.261
+9.07031,44.636
+9.07422,39.238
+9.07812,37.284
+9.08203,37.983
+9.08594,36.934
+9.08984,33.127
+9.09375,29.382
+9.09766,29.006
+9.10156,31.347
+9.10547,32.024
+9.10938,30.168
+9.11328,28.476
+9.11719,29.643
+9.12109,33.319
+9.12500,36.020
+9.12891,35.576
+9.13281,34.963
+9.13672,36.548
+9.14062,39.287
+9.14453,40.201
+9.14844,38.160
+9.15234,35.248
+9.15625,34.299
+9.16016,35.717
+9.16406,36.900
+9.16797,34.929
+9.17188,30.661
+9.17578,27.836
+9.17969,27.025
+9.18359,25.790
+9.18750,21.182
+9.19141,13.671
+9.19531,7.310
+9.19922,5.911
+9.20312,7.812
+9.20703,8.910
+9.21094,8.488
+9.21484,8.739
+9.21875,11.670
+9.22266,15.491
+9.22656,15.363
+9.23047,10.696
+9.23438,5.603
+9.23828,4.525
+9.24219,6.007
+9.24609,5.726
+9.25000,2.702
+9.25391,-0.399
+9.25781,-0.834
+9.26172,0.452
+9.26562,-1.658
+9.26953,-7.849
+9.27344,-14.284
+9.27734,-16.692
+9.28125,-15.288
+9.28516,-14.553
+9.28906,-17.058
+9.29297,-19.989
+9.29688,-19.291
+9.30078,-14.426
+9.30469,-9.790
+9.30859,-8.995
+9.31250,-10.942
+9.31641,-10.411
+9.32031,-5.085
+9.32422,1.939
+9.32812,5.445
+9.33203,6.091
+9.33594,7.419
+9.33984,10.896
+9.34375,13.207
+9.34766,11.374
+9.35156,6.136
+9.35547,2.219
+9.35938,1.441
+9.36328,1.558
+9.36719,-1.145
+9.37109,-6.303
+9.37500,-9.180
+9.37891,-8.119
+9.38281,-6.314
+9.38672,-8.409
+9.39062,-14.602
+9.39453,-19.064
+9.39844,-19.127
+9.40234,-16.437
+9.40625,-14.134
+9.41016,-13.626
+9.41406,-11.775
+9.41797,-6.207
+9.42188,1.188
+9.42578,5.384
+9.42969,4.324
+9.43359,1.590
+9.43750,0.570
+9.44141,1.549
+9.44531,1.480
+9.44922,-1.713
+9.45312,-5.078
+9.45703,-5.328
+9.46094,-3.629
+9.46484,-3.374
+9.46875,-6.568
+9.47266,-11.426
+9.47656,-13.648
+9.48047,-12.376
+9.48438,-11.941
+9.48828,-14.379
+9.49219,-16.700
+9.49609,-15.643
+9.50000,-11.059
+9.50391,-6.946
+9.50781,-6.178
+9.51172,-7.173
+9.51562,-5.583
+9.51953,-1.022
+9.52344,3.883
+9.52734,5.328
+9.53125,4.014
+9.53516,3.855
+9.53906,6.563
+9.54297,8.704
+9.54688,7.351
+9.55078,1.643
+9.55469,-5.504
+9.55859,-9.991
+9.56250,-12.944
+9.56641,-17.609
+9.57031,-23.680
+9.57422,-28.207
+9.57812,-27.890
+9.58203,-24.094
+9.58594,-21.831
+9.58984,-22.970
+9.59375,-24.911
+9.59766,-24.422
+9.60156,-21.430
+9.60547,-19.384
+9.60938,-20.485
+9.61328,-21.272
+9.61719,-17.690
+9.62109,-11.072
+9.62500,-5.367
+9.62891,-3.318
+9.63281,-3.351
+9.63672,-2.670
+9.64062,-0.838
+9.64453,-0.487
+9.64844,-4.170
+9.65234,-9.853
+9.65625,-13.633
+9.66016,-14.446
+9.66406,-14.927
+9.66797,-17.733
+9.67188,-22.033
+9.67578,-23.959
+9.67969,-23.028
+9.68359,-22.169
+9.68750,-23.648
+9.69141,-25.658
+9.69531,-23.795
+9.69922,-17.675
+9.70312,-11.327
+9.70703,-9.034
+9.71094,-9.977
+9.71484,-9.879
+9.71875,-7.331
+9.72266,-4.522
+9.72656,-4.184
+9.73047,-6.649
+9.73438,-7.582
+9.73828,-5.409
+9.74219,-2.862
+9.74609,-3.433
+9.75000,-8.454
+9.75391,-15.213
+9.75781,-19.818
+9.76172,-22.488
+9.76562,-25.614
+9.76953,-31.121
+9.77344,-35.928
+9.77734,-36.015
+9.78125,-31.905
+9.78516,-27.647
+9.78906,-25.474
+9.79297,-23.857
+9.79688,-19.384
+9.80078,-13.032
+9.80469,-7.621
+9.80859,-6.653
+9.81250,-7.324
+9.81641,-5.530
+9.82031,-0.430
+9.82422,4.052
+9.82812,4.960
+9.83203,3.818
+9.83594,3.715
+9.83984,5.725
+9.84375,6.126
+9.84766,2.474
+9.85156,-3.183
+9.85547,-7.722
+9.85938,-9.281
+9.86328,-9.940
+9.86719,-12.260
+9.87109,-16.928
+9.87500,-21.089
+9.87891,-22.463
+9.88281,-21.511
+9.88672,-20.686
+9.89062,-20.247
+9.89453,-18.759
+9.89844,-13.229
+9.90234,-5.519
+9.90625,0.170
+9.91016,1.933
+9.91406,1.566
+9.91797,2.174
+9.92188,4.319
+9.92578,4.285
+9.92969,0.520
+9.93359,-4.332
+9.93750,-6.550
+9.94141,-4.680
+9.94531,-2.432
+9.94922,-3.639
+9.95312,-6.698
+9.95703,-8.354
+9.96094,-9.424
+9.96484,-12.460
+9.96875,-19.037
+9.97266,-25.724
+9.97656,-26.931
+9.98047,-23.243
+9.98438,-18.795
+9.98828,-17.528
+9.99219,-17.487
+9.99609,-14.903
+10.00000,-8.700
+10.00391,-1.678
+10.00781,1.843
+10.01172,3.211
+10.01562,4.580
+10.01953,7.490
+10.02344,10.102
+10.02734,9.799
+10.03125,6.419
+10.03516,2.933
+10.03906,1.639
+10.04297,1.625
+10.04688,-0.782
+10.05078,-6.145
+10.05469,-10.620
+10.05859,-11.614
+10.06250,-9.848
+10.06641,-10.267
+10.07031,-14.190
+10.07422,-17.992
+10.07812,-17.373
+10.08203,-14.676
+10.08594,-14.056
+10.08984,-16.358
+10.09375,-17.658
+10.09766,-13.359
+10.10156,-4.927
+10.10547,1.514
+10.10938,4.566
+10.11328,6.466
+10.11719,10.275
+10.12109,14.486
+10.12500,14.468
+10.12891,10.005
+10.13281,4.509
+10.13672,1.527
+10.14062,0.453
+10.14453,-2.316
+10.14844,-6.737
+10.15234,-9.977
+10.15625,-10.220
+10.16016,-8.556
+10.16406,-7.725
+10.16797,-9.607
+10.17188,-12.032
+10.17578,-12.062
+10.17969,-10.029
+10.18359,-7.066
+10.18750,-5.503
+10.19141,-4.445
+10.19531,-1.545
+10.19922,3.891
+10.20312,9.549
+10.20703,12.899
+10.21094,12.729
+10.21484,11.504
+10.21875,12.271
+10.22266,14.129
+10.22656,13.231
+10.23047,9.274
+10.23438,5.572
+10.23828,4.319
+10.24219,3.382
+10.24609,-1.107
+10.25000,-8.795
+10.25391,-15.538
+10.25781,-17.824
+10.26172,-16.771
+10.26562,-15.833
+10.26953,-16.232
+10.27344,-16.133
+10.27734,-12.840
+10.28125,-7.698
+10.28516,-4.031
+10.28906,-4.118
+10.29297,-5.590
+10.29688,-4.491
+10.30078,-0.339
+10.30469,4.337
+10.30859,7.316
+10.31250,9.041
+10.31641,12.003
+10.32031,15.979
+10.32422,17.309
+10.32812,14.041
+10.33203,7.602
+10.33594,1.937
+10.33984,-0.829
+10.34375,-3.594
+10.34766,-8.775
+10.35156,-15.020
+10.35547,-18.769
+10.35938,-17.665
+10.36328,-14.751
+10.36719,-14.236
+10.37109,-15.545
+10.37500,-14.689
+10.37891,-10.257
+10.38281,-5.589
+10.38672,-4.225
+10.39062,-5.628
+10.39453,-5.196
+10.39844,0.037
+10.40234,6.215
+10.40625,8.961
+10.41016,6.983
+10.41406,4.278
+10.41797,5.172
+10.42188,7.580
+10.42578,8.137
+10.42969,4.828
+10.43359,1.193
+10.43750,1.184
+10.44141,3.226
+10.44531,2.562
+10.44922,-3.014
+10.45312,-9.557
+10.45703,-11.656
+10.46094,-9.412
+10.46484,-7.296
+10.46875,-6.895
+10.47266,-5.954
+10.47656,-0.323
+10.48047,7.982
+10.48438,14.420
+10.48828,16.188
+10.49219,14.687
+10.49609,14.959
+10.50000,17.808
+10.50391,20.632
+10.50781,20.655
+10.51172,18.358
+10.51562,17.780
+10.51953,19.560
+10.52344,21.565
+10.52734,20.743
+10.53125,16.613
+10.53516,12.141
+10.53906,9.523
+10.54297,7.053
+10.54688,2.941
+10.55078,-2.628
+10.55469,-7.265
+10.55859,-7.916
+10.56250,-6.302
+10.56641,-5.334
+10.57031,-6.146
+10.57422,-6.429
+10.57812,-3.715
+10.58203,0.852
+10.58594,3.795
+10.58984,3.824
+10.59375,4.100
+10.59766,8.720
+10.60156,15.020
+10.60547,18.363
+10.60938,17.226
+10.61328,14.019
+10.61719,13.030
+10.62109,14.519
+10.62500,13.534
+10.62891,9.086
+10.63281,4.253
+10.63672,3.886
+10.64062,7.536
+10.64453,10.296
+10.64844,8.487
+10.65234,4.080
+10.65625,1.013
+10.66016,1.152
+10.66406,2.164
+10.66797,2.052
+10.67188,1.760
+10.67578,4.282
+10.67969,10.369
+10.68359,17.071
+10.68750,20.257
+10.69141,21.358
+10.69531,22.558
+10.69922,25.746
+10.70312,28.395
+10.70703,27.495
+10.71094,23.475
+10.71484,20.054
+10.71875,20.110
+10.72266,22.094
+10.72656,21.327
+10.73047,16.960
+10.73438,11.968
+10.73828,10.149
+10.74219,10.794
+10.74609,10.505
+10.75000,7.577
+10.75391,4.879
+10.75781,6.884
+10.76172,12.062
+10.76562,15.952
+10.76953,15.905
+10.77344,14.348
+10.77734,16.270
+10.78125,21.278
+10.78516,25.154
+10.78906,24.914
+10.79297,23.611
+10.79688,25.602
+10.80078,31.064
+10.80469,35.771
+10.80859,35.518
+10.81250,31.630
+10.81641,28.586
+10.82031,27.836
+10.82422,26.066
+10.82812,20.737
+10.83203,14.379
+10.83594,11.875
+10.83984,14.065
+10.84375,17.044
+10.84766,18.035
+10.85156,15.758
+10.85547,14.142
+10.85938,14.276
+10.86328,14.656
+10.86719,13.313
+10.87109,11.808
+10.87500,12.388
+10.87891,17.733
+10.88281,23.837
+10.88672,26.753
+10.89062,26.211
+10.89453,25.688
+10.89844,26.911
+10.90234,29.038
+10.90625,28.186
+10.91016,23.926
+10.91406,19.040
+10.91797,16.995
+10.92188,16.065
+10.92578,14.347
+10.92969,10.559
+10.93359,7.082
+10.93750,6.382
+10.94141,7.021
+10.94531,5.962
+10.94922,1.667
+10.95312,-1.309
+10.95703,0.281
+10.96094,5.229
+10.96484,9.398
+10.96875,9.765
+10.97266,9.276
+10.97656,11.077
+10.98047,15.264
+10.98438,17.216
+10.98828,15.774
+10.99219,13.501
+10.99609,14.457
+11.00000,18.075
+11.00391,20.342
+11.00781,18.260
+11.01172,13.717
+11.01562,9.916
+11.01953,8.340
+11.02344,6.834
+11.02734,1.983
+11.03125,-4.055
+11.03516,-7.961
+11.03906,-7.742
+11.04297,-4.538
+11.04688,-3.248
+11.05078,-4.333
+11.05469,-4.866
+11.05859,-1.940
+11.06250,2.454
+11.06641,4.389
+11.07031,2.432
+11.07422,0.660
+11.07812,2.175
+11.08203,5.507
+11.08594,7.533
+11.08984,6.268
+11.09375,5.272
+11.09766,6.729
+11.10156,9.547
+11.10547,9.552
+11.10938,5.901
+11.11328,2.488
+11.11719,2.063
+11.12109,3.489
+11.12500,3.608
+11.12891,0.491
+11.13281,-3.294
+11.13672,-4.413
+11.14062,-2.160
+11.14453,-0.368
+11.14844,-2.245
+11.15234,-5.735
+11.15625,-5.754
+11.16016,-0.185
+11.16406,6.609
+11.16797,9.670
+11.17188,9.174
+11.17578,9.838
+11.17969,13.721
+11.18359,17.069
+11.18750,15.133
+11.19141,9.553
+11.19531,5.793
+11.19922,7.026
+11.20312,10.424
+11.20703,10.684
+11.21094,8.101
+11.21484,6.708
+11.21875,7.722
+11.22266,9.140
+11.22656,7.579
+11.23047,2.663
+11.23438,-1.851
+11.23828,-3.372
+11.24219,-2.999
+11.24609,-3.180
+11.25000,-4.097
+11.25391,-3.522
+11.25781,0.670
+11.26172,7.672
+11.26562,12.853
+11.26953,13.865
+11.27344,12.908
+11.27734,14.141
+11.28125,17.570
+11.28516,20.578
+11.28906,19.287
+11.29297,16.454
+11.29688,16.150
+11.30078,18.164
+11.30469,19.792
+11.30859,16.961
+11.31250,13.170
+11.31641,12.085
+11.32031,14.365
+11.32422,15.794
+11.32812,14.114
+11.33203,11.236
+11.33594,10.646
+11.33984,13.109
+11.34375,15.923
+11.34766,15.297
+11.35156,12.936
+11.35547,11.988
+11.35938,14.858
+11.36328,19.003
+11.36719,21.602
+11.37109,22.543
+11.37500,24.927
+11.37891,29.401
+11.38281,32.767
+11.38672,32.008
+11.39062,26.863
+11.39453,21.716
+11.39844,20.192
+11.40234,20.650
+11.40625,19.273
+11.41016,15.486
+11.41406,13.679
+11.41797,16.067
+11.42188,20.453
+11.42578,21.775
+11.42969,19.283
+11.43359,16.234
+11.43750,15.309
+11.44141,16.002
+11.44531,15.293
+11.44922,13.127
+11.45312,12.129
+11.45703,14.937
+11.46094,19.905
+11.46484,23.908
+11.46875,25.300
+11.47266,26.120
+11.47656,28.766
+11.48047,33.486
+11.48438,36.645
+11.48828,35.288
+11.49219,31.145
+11.49609,28.471
+11.50000,28.396
+11.50391,28.094
+11.50781,24.674
+11.51172,18.791
+11.51562,14.857
+11.51953,15.614
+11.52344,17.364
+11.52734,16.055
+11.53125,13.465
+11.53516,12.911
+11.53906,16.980
+11.54297,20.637
+11.54688,20.190
+11.55078,16.546
+11.55469,14.209
+11.55859,15.125
+11.56250,16.614
+11.56641,16.167
+11.57031,13.857
+11.57422,13.588
+11.57812,17.995
+11.58203,24.603
+11.58594,27.644
+11.58984,25.126
+11.59375,20.110
+11.59766,17.737
+11.60156,17.593
+11.60547,15.767
+11.60938,9.883
+11.61328,3.698
+11.61719,1.978
+11.62109,5.333
+11.62500,8.275
+11.62891,6.879
+11.63281,3.884
+11.63672,3.921
+11.64062,7.332
+11.64453,10.091
+11.64844,9.238
+11.65234,6.940
+11.65625,7.305
+11.66016,11.446
+11.66406,15.678
+11.66797,16.606
+11.67188,14.646
+11.67578,13.407
+11.67969,14.854
+11.68359,16.575
+11.68750,15.259
+11.69141,11.073
+11.69531,7.755
+11.69922,7.521
+11.70312,8.949
+11.70703,8.041
+11.71094,3.184
+11.71484,-2.432
+11.71875,-5.441
+11.72266,-5.173
+11.72656,-5.957
+11.73047,-8.397
+11.73438,-9.451
+11.73828,-5.587
+11.74219,0.770
+11.74609,4.826
+11.75000,5.140
+11.75391,5.333
+11.75781,7.781
+11.76172,10.819
+11.76562,9.693
+11.76953,4.365
+11.77344,0.193
+11.77734,1.665
+11.78125,6.716
+11.78516,10.120
+11.78906,9.280
+11.79297,6.718
+11.79688,5.512
+11.80078,6.124
+11.80469,5.365
+11.80859,0.933
+11.81250,-4.198
+11.81641,-6.147
+11.82031,-4.706
+11.82422,-2.817
+11.82812,-3.497
+11.83203,-5.842
+11.83594,-6.256
+11.83984,-2.772
+11.84375,0.683
+11.84766,1.472
+11.85156,0.231
+11.85547,1.444
+11.85938,5.513
+11.86328,8.924
+11.86719,8.453
+11.87109,6.032
+11.87500,5.450
+11.87891,7.026
+11.88281,7.184
+11.88672,3.479
+11.89062,-2.172
+11.89453,-5.133
+11.89844,-3.632
+11.90234,-0.944
+11.90625,-1.117
+11.91016,-5.100
+11.91406,-8.604
+11.91797,-9.435
+11.92188,-8.552
+11.92578,-8.682
+11.92969,-10.747
+11.93359,-13.262
+11.93750,-12.358
+11.94141,-7.166
+11.94531,-1.126
+11.94922,2.165
+11.95312,3.206
+11.95703,5.725
+11.96094,10.232
+11.96484,12.826
+11.96875,10.959
+11.97266,6.529
+11.97656,4.516
+11.98047,6.257
+11.98438,8.667
+11.98828,8.080
+11.99219,5.343
+11.99609,3.529
+12.00000,4.848
+12.00391,5.411
+12.00781,1.881
+12.01172,-4.055
+12.01562,-8.126
+12.01953,-7.897
+12.02344,-5.927
+12.02734,-5.893
+12.03125,-7.380
+12.03516,-6.537
+12.03906,-2.176
+12.04297,2.182
+12.04688,3.839
+12.05078,3.017
+12.05469,4.153
+12.05859,9.651
+12.06250,16.164
+12.06641,19.883
+12.07031,19.289
+12.07422,17.977
+12.07812,17.776
+12.08203,17.390
+12.08594,13.773
+12.08984,6.902
+12.09375,1.413
+12.09766,0.114
+12.10156,1.206
+12.10547,1.907
+12.10938,0.338
+12.11328,-1.776
+12.11719,-1.390
+12.12109,0.378
+12.12500,0.616
+12.12891,-1.891
+12.13281,-4.890
+12.13672,-4.588
+12.14062,-0.745
+12.14453,3.177
+12.14844,4.843
+12.15234,6.112
+12.15625,9.514
+12.16016,14.644
+12.16406,17.560
+12.16797,16.083
+12.17188,11.780
+12.17578,9.178
+12.17969,8.274
+12.18359,7.411
+12.18750,3.560
+12.19141,-1.825
+12.19531,-5.479
+12.19922,-6.474
+12.20312,-6.750
+12.20703,-8.891
+12.21094,-12.816
+12.21484,-16.431
+12.21875,-16.172
+12.22266,-13.513
+12.22656,-12.707
+12.23047,-14.320
+12.23438,-14.502
+12.23828,-10.899
+12.24219,-4.489
+12.24609,-0.996
+12.25000,-2.099
+12.25391,-3.914
+12.25781,-2.268
+12.26172,2.154
+12.26562,5.757
+12.26953,5.854
+12.27344,5.011
+12.27734,6.012
+12.28125,7.071
+12.28516,3.915
+12.28906,-4.125
+12.29297,-12.910
+12.29688,-17.920
+12.30078,-18.047
+12.30469,-17.023
+12.30859,-17.540
+12.31250,-19.232
+12.31641,-18.745
+12.32031,-15.145
+12.32422,-10.359
+12.32812,-8.224
+12.33203,-9.225
+12.33594,-9.789
+12.33984,-6.472
+12.34375,-1.497
+12.34766,0.739
+12.35156,0.062
+12.35547,0.579
+12.35938,5.289
+12.36328,10.504
+12.36719,11.269
+12.37109,6.552
+12.37500,2.483
+12.37891,2.526
+12.38281,3.873
+12.38672,1.252
+12.39062,-5.470
+12.39453,-10.982
+12.39844,-12.749
+12.40234,-12.263
+12.40625,-13.500
+12.41016,-17.227
+12.41406,-20.094
+12.41797,-19.313
+12.42188,-15.928
+12.42578,-13.144
+12.42969,-11.674
+12.43359,-10.118
+12.43750,-6.693
+12.44141,-1.366
+12.44531,3.122
+12.44922,4.284
+12.45312,2.828
+12.45703,1.339
+12.46094,2.564
+12.46484,3.304
+12.46875,1.552
+12.47266,-1.350
+12.47656,-2.405
+12.48047,-0.847
+12.48438,0.654
+12.48828,-2.682
+12.49219,-8.619
+12.49609,-12.934
+12.50000,-15.160
+12.50391,-17.100
+12.50781,-21.547
+12.51172,-25.787
+12.51562,-25.525
+12.51953,-20.696
+12.52344,-14.548
+12.52734,-11.470
+12.53125,-10.439
+12.53516,-7.846
+12.53906,-3.226
+12.54297,1.336
+12.54688,2.923
+12.55078,2.320
+12.55469,3.214
+12.55859,6.431
+12.56250,9.365
+12.56641,9.266
+12.57031,5.278
+12.57422,1.006
+12.57812,-0.912
+12.58203,-1.832
+12.58594,-5.095
+12.58984,-11.231
+12.59375,-16.571
+12.59766,-17.997
+12.60156,-16.531
+12.60547,-17.271
+12.60938,-21.200
+12.61328,-24.558
+12.61719,-23.236
+12.62109,-18.239
+12.62500,-13.498
+12.62891,-11.826
+12.63281,-10.539
+12.63672,-5.957
+12.64062,1.881
+12.64453,8.944
+12.64844,11.174
+12.65234,10.255
+12.65625,9.303
+12.66016,9.979
+12.66406,9.806
+12.66797,6.409
+12.67188,0.694
+12.67578,-2.544
+12.67969,-2.212
+12.68359,-1.509
+12.68750,-3.785
+12.69141,-7.732
+12.69531,-11.223
+12.69922,-11.946
+12.70312,-12.500
+12.70703,-15.041
+12.71094,-19.264
+12.71484,-20.121
+12.71875,-15.656
+12.72266,-8.408
+12.72656,-2.021
+12.73047,0.830
+12.73438,2.489
+12.73828,6.530
+12.74219,11.898
+12.74609,15.735
+12.75000,16.464
+12.75391,16.276
+12.75781,18.118
+12.76172,21.639
+12.76562,21.879
+12.76953,17.812
+12.77344,12.160
+12.77734,8.851
+12.78125,8.100
+12.78516,6.910
+12.78906,1.707
+12.79297,-3.947
+12.79688,-5.029
+12.80078,-1.753
+12.80469,1.120
+12.80859,0.613
+12.81250,-0.746
+12.81641,0.907
+12.82031,5.380
+12.82422,9.175
+12.82812,9.959
+12.83203,9.932
+12.83594,13.437
+12.83984,20.270
+12.84375,27.127
+12.84766,29.960
+12.85156,29.958
+12.85547,29.994
+12.85938,31.271
+12.86328,31.007
+12.86719,26.003
+12.87109,18.187
+12.87500,11.361
+12.87891,8.665
+12.88281,8.241
+12.88672,6.307
+12.89062,2.671
+12.89453,-0.878
+12.89844,-1.515
+12.90234,-0.294
+12.90625,0.097
+12.91016,-1.236
+12.91406,-1.251
+12.91797,2.528
+12.92188,9.153
+12.92578,13.938
+12.92969,14.867
+12.93359,15.149
+12.93750,18.395
+12.94141,24.867
+12.94531,29.962
+12.94922,30.788
+12.95312,29.984
+12.95703,30.624
+12.96094,32.507
+12.96484,32.008
+12.96875,26.946
+12.97266,19.652
+12.97656,13.822
+12.98047,11.377
+12.98438,8.585
+12.98828,3.430
+12.99219,-1.479
+12.99609,-3.272
+13.00000,-0.363
+13.00391,4.238
+13.00781,7.111
+13.01172,7.964
+13.01562,9.940
+13.01953,13.500
+13.02344,16.360
+13.02734,16.262
+13.03125,13.889
+13.03516,13.344
+13.03906,16.865
+13.04297,22.255
+13.04688,25.271
+13.05078,25.552
+13.05469,25.906
+13.05859,27.998
+13.06250,29.450
+13.06641,27.122
+13.07031,20.346
+13.07422,14.365
+13.07812,12.338
+13.08203,11.541
+13.08594,8.403
+13.08984,2.408
+13.09375,-2.126
+13.09766,-2.036
+13.10156,1.493
+13.10547,3.408
+13.10938,2.034
+13.11328,1.437
+13.11719,4.535
+13.12109,10.742
+13.12500,15.669
+13.12891,17.168
+13.13281,17.403
+13.13672,20.143
+13.14062,24.305
+13.14453,26.740
+13.14844,25.458
+13.15234,22.382
+13.15625,22.178
+13.16016,24.919
+13.16406,27.271
+13.16797,25.431
+13.17188,20.778
+13.17578,16.520
+13.17969,14.417
+13.18359,12.330
+13.18750,7.535
+13.19141,1.005
+13.19531,-3.216
+13.19922,-3.094
+13.20312,-0.769
+13.20703,1.633
+13.21094,3.368
+13.21484,7.438
+13.21875,13.820
+13.22266,20.163
+13.22656,22.872
+13.23047,21.864
+13.23438,20.505
+13.23828,22.183
+13.24219,26.091
+13.24609,28.162
+13.25000,27.394
+13.25391,27.108
+13.25781,29.715
+13.26172,33.532
+13.26562,34.543
+13.26953,30.914
+13.27344,25.524
+13.27734,22.546
+13.28125,22.267
+13.28516,21.843
+13.28906,18.141
+13.29297,15.126
+13.29688,16.004
+13.30078,21.220
+13.30469,26.196
+13.30859,28.079
+13.31250,28.905
+13.31641,32.764
+13.32031,41.105
+13.32422,49.287
+13.32812,52.802
+13.33203,53.839
+13.33594,56.082
+13.33984,60.186
+13.34375,62.840
+13.34766,60.912
+13.35156,56.485
+13.35547,53.933
+13.35938,54.981
+13.36328,56.421
+13.36719,55.398
+13.37109,52.574
+13.37500,52.320
+13.37891,54.521
+13.38281,56.530
+13.38672,54.753
+13.39062,50.436
+13.39453,46.968
+13.39844,46.380
+13.40234,47.792
+13.40625,48.774
+13.41016,49.299
+13.41406,51.977
+13.41797,57.610
+13.42188,64.958
+13.42578,69.266
+13.42969,69.139
+13.43359,66.913
+13.43750,66.320
+13.44141,67.504
+13.44531,66.072
+13.44922,60.597
+13.45312,54.683
+13.45703,52.590
+13.46094,54.989
+13.46484,56.498
+13.46875,53.483
+13.47266,46.724
+13.47656,42.654
+13.48047,42.170
+13.48438,41.631
+13.48828,37.709
+13.49219,31.738
+13.49609,28.322
+13.50000,28.913
+13.50391,30.890
+13.50781,30.123
+13.51172,27.529
+13.51562,26.812
+13.51953,30.020
+13.52344,34.401
+13.52734,36.081
+13.53125,34.869
+13.53516,34.194
+13.53906,37.352
+13.54297,41.645
+13.54688,42.347
+13.55078,37.417
+13.55469,31.130
+13.55859,27.980
+13.56250,27.474
+13.56641,25.923
+13.57031,22.183
+13.57422,19.792
+13.57812,21.241
+13.58203,25.113
+13.58594,27.217
+13.58984,25.089
+13.59375,22.124
+13.59766,20.877
+13.60156,21.612
+13.60547,21.542
+13.60938,20.088
+13.61328,19.527
+13.61719,21.972
+13.62109,27.087
+13.62500,30.508
+13.62891,30.894
+13.63281,30.962
+13.63672,32.517
+13.64062,35.300
+13.64453,35.739
+13.64844,32.556
+13.65234,27.438
+13.65625,24.881
+13.66016,24.990
+13.66406,24.535
+13.66797,20.633
+13.67188,14.141
+13.67578,10.421
+13.67969,10.673
+13.68359,12.343
+13.68750,12.051
+13.69141,10.429
+13.69531,9.868
+13.69922,12.723
+13.70312,16.125
+13.70703,16.613
+13.71094,14.830
+13.71484,13.546
+13.71875,15.259
+13.72266,18.024
+13.72656,18.222
+13.73047,16.746
+13.73438,17.471
+13.73828,22.017
+13.74219,27.884
+13.74609,30.510
+13.75000,28.679
+13.75391,25.732
+13.75781,24.384
+13.76172,24.171
+13.76562,22.113
+13.76953,17.573
+13.77344,13.625
+13.77734,13.643
+13.78125,15.709
+13.78516,17.558
+13.78906,17.119
+13.79297,16.571
+13.79688,18.679
+13.80078,22.046
+13.80469,22.827
+13.80859,21.074
+13.81250,19.113
+13.81641,20.981
+13.82031,25.396
+13.82422,29.194
+13.82812,29.458
+13.83203,26.847
+13.83594,25.243
+13.83984,26.257
+13.84375,27.700
+13.84766,26.313
+13.85156,22.042
+13.85547,18.037
+13.85938,17.103
+13.86328,17.301
+13.86719,14.928
+13.87109,9.377
+13.87500,4.548
+13.87891,3.579
+13.88281,4.415
+13.88672,2.986
+13.89062,-0.064
+13.89453,-1.095
+13.89844,3.250
+13.90234,9.867
+13.90625,13.724
+13.91016,13.000
+13.91406,12.267
+13.91797,14.929
+13.92188,19.023
+13.92578,19.951
+13.92969,17.015
+13.93359,14.863
+13.93750,16.590
+13.94141,21.360
+13.94531,24.093
+13.94922,22.236
+13.95312,19.784
+13.95703,20.350
+13.96094,21.886
+13.96484,19.544
+13.96875,13.109
+13.97266,5.807
+13.97656,2.596
+13.98047,3.706
+13.98438,5.398
+13.98828,5.381
+13.99219,4.940
+13.99609,6.972
+14.00000,11.384
+14.00391,15.062
+14.00781,15.565
+14.01172,13.374
+14.01562,13.011
+14.01953,15.225
+14.02344,18.294
+14.02734,18.506
+14.03125,16.607
+14.03516,15.945
+14.03906,18.091
+14.04297,20.905
+14.04688,21.024
+14.05078,16.794
+14.05469,12.865
+14.05859,13.104
+14.06250,16.293
+14.06641,17.554
+14.07031,14.620
+14.07422,10.823
+14.07812,10.723
+14.08203,12.839
+14.08594,12.836
+14.08984,10.286
+14.09375,8.494
+14.09766,10.489
+14.10156,15.121
+14.10547,19.059
+14.10938,20.792
+14.11328,22.399
+14.11719,25.654
+14.12109,30.040
+14.12500,31.393
+14.12891,28.158
+14.13281,23.344
+14.13672,20.654
+14.14062,21.241
+14.14453,22.273
+14.14844,21.091
+14.15234,18.523
+14.15625,18.210
+14.16016,20.552
+14.16406,21.706
+14.16797,18.228
+14.17188,11.370
+14.17578,6.539
+14.17969,6.175
+14.18359,7.685
+14.18750,7.550
+14.19141,6.265
+14.19531,7.376
+14.19922,12.052
+14.20312,17.999
+14.20703,20.724
+14.21094,20.548
+14.21484,20.818
+14.21875,23.988
+14.22266,28.066
+14.22656,29.783
+14.23047,29.092
+14.23438,29.058
+14.23828,30.664
+14.24219,33.006
+14.24609,32.682
+14.25000,29.444
+14.25391,26.137
+14.25781,25.554
+14.26172,26.868
+14.26562,26.965
+14.26953,24.765
+14.27344,23.182
+14.27734,24.732
+14.28125,28.122
+14.28516,28.858
+14.28906,25.855
+14.29297,21.943
+14.29688,21.161
+14.30078,24.045
+14.30469,27.059
+14.30859,28.029
+14.31250,27.490
+14.31641,29.250
+14.32031,33.375
+14.32422,36.662
+14.32812,35.393
+14.33203,30.963
+14.33594,27.580
+14.33984,27.735
+14.34375,28.706
+14.34766,26.934
+14.35156,23.149
+14.35547,20.610
+14.35938,21.497
+14.36328,24.420
+14.36719,24.349
+14.37109,20.782
+14.37500,16.987
+14.37891,16.089
+14.38281,16.767
+14.38672,16.599
+14.39062,14.974
+14.39453,14.852
+14.39844,18.558
+14.40234,24.293
+14.40625,27.539
+14.41016,28.269
+14.41406,28.634
+14.41797,32.125
+14.42188,36.439
+14.42578,38.765
+14.42969,38.229
+14.43359,36.981
+14.43750,36.696
+14.44141,37.108
+14.44531,34.824
+14.44922,29.607
+14.45312,23.464
+14.45703,19.600
+14.46094,18.058
+14.46484,16.527
+14.46875,13.688
+14.47266,11.648
+14.47656,13.169
+14.48047,18.046
+14.48438,21.952
+14.48828,21.389
+14.49219,17.960
+14.49609,16.236
+14.50000,18.367
+14.50391,21.344
+14.50781,21.760
+14.51172,19.424
+14.51562,19.171
+14.51953,24.010
+14.52344,29.778
+14.52734,31.888
+14.53125,30.351
+14.53516,29.037
+14.53906,30.418
+14.54297,31.034
+14.54688,27.505
+14.55078,20.726
+14.55469,16.599
+14.55859,17.555
+14.56250,19.865
+14.56641,19.496
+14.57031,15.848
+14.57422,13.596
+14.57812,16.212
+14.58203,20.563
+14.58594,22.589
+14.58984,21.823
+14.59375,21.545
+14.59766,24.744
+14.60156,29.981
+14.60547,33.129
+14.60938,32.013
+14.61328,30.312
+14.61719,31.123
+14.62109,34.754
+14.62500,37.344
+14.62891,36.269
+14.63281,33.819
+14.63672,33.506
+14.64062,35.564
+14.64453,36.922
+14.64844,32.672
+14.65234,25.086
+14.65625,18.503
+14.66016,14.911
+14.66406,12.763
+14.66797,8.463
+14.67188,2.916
+14.67578,0.460
+14.67969,3.362
+14.68359,7.624
+14.68750,9.981
+14.69141,10.065
+14.69531,10.791
+14.69922,13.743
+14.70312,16.679
+14.70703,17.160
+14.71094,16.216
+14.71484,17.110
+14.71875,21.457
+14.72266,27.016
+14.72656,30.180
+14.73047,29.726
+14.73438,28.175
+14.73828,28.872
+14.74219,29.792
+14.74609,28.050
+14.75000,23.651
+14.75391,19.478
+14.75781,18.594
+14.76172,19.759
+14.76562,18.782
+14.76953,14.171
+14.77344,8.643
+14.77734,6.837
+14.78125,8.946
+14.78516,11.655
+14.78906,11.625
+14.79297,10.664
+14.79688,12.509
+14.80078,18.058
+14.80469,22.870
+14.80859,23.710
+14.81250,21.600
+14.81641,20.276
+14.82031,21.223
+14.82422,21.255
+14.82812,18.135
+14.83203,12.993
+14.83594,10.281
+14.83984,12.521
+14.84375,15.326
+14.84766,14.559
+14.85156,9.421
+14.85547,4.732
+14.85938,2.907
+14.86328,3.167
+14.86719,0.871
+14.87109,-3.809
+14.87500,-6.361
+14.87891,-3.730
+14.88281,1.921
+14.88672,6.207
+14.89062,8.191
+14.89453,10.116
+14.89844,15.138
+14.90234,21.527
+14.90625,24.834
+14.91016,24.712
+14.91406,24.159
+14.91797,26.452
+14.92188,30.814
+14.92578,32.719
+14.92969,30.955
+14.93359,28.123
+14.93750,27.719
+14.94141,29.000
+14.94531,27.916
+14.94922,22.271
+14.95312,15.827
+14.95703,12.203
+14.96094,12.109
+14.96484,11.721
+14.96875,8.753
+14.97266,4.263
+14.97656,1.169
+14.98047,0.953
+14.98438,0.476
+14.98828,-0.740
+14.99219,-1.177
+14.99609,1.793
+15.00000,8.421
+15.00391,15.801
+15.00781,20.296
+15.01172,21.625
+15.01562,22.182
+15.01953,23.974
+15.02344,25.234
+15.02734,23.318
+15.03125,18.729
+15.03516,15.487
+15.03906,15.410
+15.04297,16.810
+15.04688,15.840
+15.05078,12.126
+15.05469,9.226
+15.05859,9.319
+15.06250,10.459
+15.06641,8.520
+15.07031,3.482
+15.07422,-0.846
+15.07812,-1.071
+15.08203,2.339
+15.08594,5.187
+15.08984,6.138
+15.09375,7.638
+15.09766,12.000
+15.10156,18.778
+15.10547,23.125
+15.10938,22.722
+15.11328,21.287
+15.11719,22.122
+15.12109,25.274
+15.12500,27.084
+15.12891,24.205
+15.13281,17.931
+15.13672,14.030
+15.14062,13.412
+15.14453,12.001
+15.14844,6.382
+15.15234,-1.777
+15.15625,-6.370
+15.16016,-5.725
+15.16406,-4.430
+15.16797,-6.398
+15.17188,-9.983
+15.17578,-10.991
+15.17969,-7.817
+15.18359,-4.254
+15.18750,-5.051
+15.19141,-7.413
+15.19531,-6.407
+15.19922,-0.145
+15.20312,8.120
+15.20703,13.138
+15.21094,14.231
+15.21484,15.734
+15.21875,19.823
+15.22266,24.614
+15.22656,24.410
+15.23047,18.664
+15.23438,12.631
+15.23828,10.458
+15.24219,11.061
+15.24609,10.043
+15.25000,5.136
+15.25391,0.270
+15.25781,-1.549
+15.26172,-0.644
+15.26562,-0.909
+15.26953,-4.312
+15.27344,-7.607
+15.27734,-7.793
+15.28125,-4.397
+15.28516,-2.095
+15.28906,-2.522
+15.29297,-3.076
+15.29688,-0.353
+15.30078,5.503
+15.30469,9.802
+15.30859,9.973
+15.31250,8.404
+15.31641,9.022
+15.32031,11.972
+15.32422,14.702
+15.32812,13.222
+15.33203,8.726
+15.33594,4.788
+15.33984,3.667
+15.34375,2.236
+15.34766,-3.456
+15.35156,-11.436
+15.35547,-16.898
+15.35938,-17.589
+15.36328,-15.691
+15.36719,-15.832
+15.37109,-16.703
+15.37500,-14.458
+15.37891,-8.953
+15.38281,-3.333
+15.38672,-1.248
+15.39062,-1.480
+15.39453,0.435
+15.39844,5.769
+15.40234,10.994
+15.40625,13.447
+15.41016,14.081
+15.41406,15.835
+15.41797,19.993
+15.42188,23.460
+15.42578,23.232
+15.42969,18.783
+15.43359,13.518
+15.43750,9.674
+15.44141,7.016
+15.44531,3.141
+15.44922,-2.940
+15.45312,-9.170
+15.45703,-11.908
+15.46094,-12.249
+15.46484,-12.695
+15.46875,-14.942
+15.47266,-18.563
+15.47656,-19.221
+15.48047,-16.055
+15.48438,-12.030
+15.48828,-10.160
+15.49219,-9.818
+15.49609,-7.306
+15.50000,-0.870
+15.50391,5.970
+15.50781,8.157
+15.51172,6.236
+15.51562,4.926
+15.51953,6.469
+15.52344,8.663
+15.52734,7.313
+15.53125,3.809
+15.53516,1.280
+15.53906,2.039
+15.54297,2.608
+15.54688,-1.684
+15.55078,-8.513
+15.55469,-14.027
+15.55859,-14.670
+15.56250,-13.131
+15.56641,-12.775
+15.57031,-14.008
+15.57422,-12.991
+15.57812,-7.620
+15.58203,0.175
+15.58594,6.270
+15.58984,9.046
+15.59375,10.555
+15.59766,12.129
+15.60156,13.837
+15.60547,14.376
+15.60938,13.356
+15.61328,12.347
+15.61719,12.516
+15.62109,14.747
+15.62500,15.758
+15.62891,13.156
+15.63281,8.100
+15.63672,4.362
+15.64062,2.768
+15.64453,0.913
+15.64844,-3.978
+15.65234,-10.684
+15.65625,-14.303
+15.66016,-12.637
+15.66406,-10.396
+15.66797,-12.498
+15.67188,-16.489
+15.67578,-16.801
+15.67969,-12.055
+15.68359,-6.766
+15.68750,-5.284
+15.69141,-5.136
+15.69531,-2.776
+15.69922,3.893
+15.70312,10.281
+15.70703,12.570
+15.71094,10.619
+15.71484,8.823
+15.71875,9.807
+15.72266,11.076
+15.72656,9.783
+15.73047,4.921
+15.73438,1.248
+15.73828,1.131
+15.74219,3.538
+15.74609,4.432
+15.75000,0.617
+15.75391,-5.076
+15.75781,-8.054
+15.76172,-8.986
+15.76562,-10.082
+15.76953,-13.199
+15.77344,-15.099
+15.77734,-12.708
+15.78125,-8.011
+15.78516,-4.564
+15.78906,-3.998
+15.79297,-3.579
+15.79688,-0.003
+15.80078,4.626
+15.80469,6.369
+15.80859,3.940
+15.81250,0.593
+15.81641,-0.415
+15.82031,-0.149
+15.82422,-0.349
+15.82812,-3.132
+15.83203,-7.407
+15.83594,-10.786
+15.83984,-12.597
+15.84375,-15.384
+15.84766,-20.211
+15.85156,-25.744
+15.85547,-29.066
+15.85938,-28.096
+15.86328,-24.957
+15.86719,-24.092
+15.87109,-25.038
+15.87500,-25.278
+15.87891,-21.395
+15.88281,-15.144
+15.88672,-11.228
+15.89062,-10.362
+15.89453,-8.629
+15.89844,-2.824
+15.90234,4.255
+15.90625,8.669
+15.91016,8.834
+15.91406,6.816
+15.91797,5.449
+15.92188,4.246
+15.92578,0.918
+15.92969,-6.123
+15.93359,-13.146
+15.93750,-16.307
+15.94141,-16.160
+15.94531,-15.499
+15.94922,-17.412
+15.95312,-21.659
+15.95703,-23.945
+15.96094,-24.156
+15.96484,-24.950
+15.96875,-29.454
+15.97266,-34.882
+15.97656,-35.805
+15.98047,-31.508
+15.98438,-26.793
+15.98828,-25.643
+15.99219,-26.418
+15.99609,-24.726
+`;
+
+</script>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const BANDS = { Delta: [0.5, 4], Theta: [4, 8], Alpha: [8, 13], Beta: [13, 30], Gamma: [30, 80] };
+const SPEC_MAX = 60;                       // Hz shown on spectra
+const S = { fs: 256, x: null, y: null, sx: null, sy: null, label: '', band: 'Alpha' };
+
+/* ---------- FFT (iterative radix-2 Cooley-Tukey) ---------- */
+function fft(re, im) {
+  const n = re.length;
+  for (let i = 1, j = 0; i < n; i++) {           // bit-reversal permutation
+    let b = n >> 1; for (; j & b; b >>= 1) j ^= b; j ^= b;
+    if (i < j) { [re[i], re[j]] = [re[j], re[i]]; [im[i], im[j]] = [im[j], im[i]]; }
+  }
+  for (let len = 2; len <= n; len <<= 1) {       // butterflies
+    const a = -2 * Math.PI / len, wr = Math.cos(a), wi = Math.sin(a), h = len >> 1;
+    for (let i = 0; i < n; i += len) {
+      let cr = 1, ci = 0;
+      for (let k = 0; k < h; k++) {
+        const u = i + k, v = u + h;
+        const tr = re[v] * cr - im[v] * ci, ti = re[v] * ci + im[v] * cr;
+        re[v] = re[u] - tr; im[v] = im[u] - ti; re[u] += tr; im[u] += ti;
+        const t = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = t;
+      }
+    }
+  }
+}
+// Single-sided amplitude spectrum: mean removed, Hann window, zero-padded to 2^k
+function spectrum(x, fs) {
+  const n = x.length; let N = 1; while (N < n) N <<= 1;
+  const mean = x.reduce((a, b) => a + b, 0) / n;
+  const re = new Float64Array(N), im = new Float64Array(N); let ws = 0;
+  for (let i = 0; i < n; i++) { const w = 0.5 - 0.5 * Math.cos(2 * Math.PI * i / (n - 1)); re[i] = (x[i] - mean) * w; ws += w; }
+  fft(re, im);
+  const f = [], m = [];
+  for (let k = 0; k <= N / 2; k++) { f.push(k * fs / N); m.push(2 * Math.hypot(re[k], im[k]) / ws); }
+  return { f, m };
+}
+function dominant(sp) {                          // strongest peak above 0.5 Hz
+  let best = -1, bf = 0;
+  for (let i = 0; i < sp.f.length; i++) if (sp.f[i] >= 0.5 && sp.m[i] > best) { best = sp.m[i]; bf = sp.f[i]; }
+  return bf;
+}
+
+/* ---------- Digital filters: RBJ biquads, cascaded, zero-phase ---------- */
+function biquad(type, fc, fs, Q) {
+  const w = 2 * Math.PI * fc / fs, c = Math.cos(w), al = Math.sin(w) / (2 * Q);
+  let b0, b1, b2;
+  if (type === 'lp') { b0 = (1 - c) / 2; b1 = 1 - c; b2 = b0; } else { b0 = (1 + c) / 2; b1 = -(1 + c); b2 = b0; }
+  const a0 = 1 + al;
+  return { b: [b0 / a0, b1 / a0, b2 / a0], a: [-2 * c / a0, (1 - al) / a0] };
+}
+function runSection(x, s) {                      // y[n]=b0x[n]+b1x[n-1]+b2x[n-2]-a1y[n-1]-a2y[n-2]
+  const y = new Float64Array(x.length); let x1 = 0, x2 = 0, y1 = 0, y2 = 0;
+  for (let i = 0; i < x.length; i++) {
+    const v = s.b[0] * x[i] + s.b[1] * x1 + s.b[2] * x2 - s.a[0] * y1 - s.a[1] * y2;
+    x2 = x1; x1 = x[i]; y2 = y1; y1 = v; y[i] = v;
+  }
+  return y;
+}
+function filtfilt(x, secs) {                     // forward then backward pass => zero phase
+  let y = Float64Array.from(x);
+  for (const s of secs) { y = runSection(y, s); y = runSection(y.reverse(), s).reverse(); }
+  return y;
+}
+const Q4 = [0.5412, 1.3066];                     // 4th-order Butterworth section Qs
+function design(type, lo, hi, fs) {
+  const secs = [];
+  if (type !== 'lp') Q4.forEach(q => secs.push(biquad('hp', lo, fs, q)));
+  if (type !== 'hp') Q4.forEach(q => secs.push(biquad('lp', hi, fs, q)));
+  return secs;
+}
+
+/* ---------- Interactive canvas plot (zoom = wheel, pan = drag) ---------- */
+function niceStep(r) { const p = Math.pow(10, Math.floor(Math.log10(r))), f = r / p; return (f < 1.5 ? 1 : f < 3.5 ? 2 : f < 7.5 ? 5 : 10) * p; }
+class Plot {
+  constructor(id, o) {
+    this.c = $(id); this.o = o; this.d = null; this.shade = null;
+    const c = this.c; let drag = null;
+    c.addEventListener('wheel', e => {
+      if (!this.d) return; e.preventDefault();
+      const r = c.getBoundingClientRect(), fr = Math.min(1, Math.max(0, (e.clientX - r.left - 58) / (r.width - 70)));
+      const [a, b] = this.v, xc = a + fr * (b - a), k = e.deltaY < 0 ? 0.8 : 1.25;
+      let na = xc - (xc - a) * k, nb = xc + (b - xc) * k;
+      na = Math.max(na, this.full[0]); nb = Math.min(nb, this.full[1]);
+      if (nb - na > 1e-3) { this.v = [na, nb]; this.draw(); }
+    }, { passive: false });
+    c.addEventListener('mousedown', e => { drag = { x: e.clientX, v: this.v.slice() }; });
+    window.addEventListener('mouseup', () => drag = null);
+    window.addEventListener('mousemove', e => {
+      if (!drag || !this.d) return;
+      const span = drag.v[1] - drag.v[0]; let dx = -(e.clientX - drag.x) / (c.clientWidth - 70) * span;
+      dx = Math.max(this.full[0] - drag.v[0], Math.min(this.full[1] - drag.v[1], dx));
+      this.v = [drag.v[0] + dx, drag.v[1] + dx]; this.draw();
+    });
+    window.addEventListener('resize', () => this.draw());
+  }
+  set(x, y, xmax, ymax) { this.d = { x, y }; this.full = [x[0], xmax ?? x[x.length - 1]]; this.v = this.full.slice(); this.ymax = ymax; this.draw(); }
+  clear() { this.d = null; this.draw(); }
+  reset() { if (this.d) { this.v = this.full.slice(); this.draw(); } }
+  draw() {
+    const c = this.c, r = window.devicePixelRatio || 1, W = c.clientWidth, H = c.clientHeight;
+    if (!W) return; c.width = W * r; c.height = H * r;
+    const g = c.getContext('2d'); g.scale(r, r);
+    const L = 58, R = 12, T = 10, B = 40, pw = W - L - R, ph = H - T - B;
+    if (!this.d) { g.fillStyle = '#8892a6'; g.font = '14px sans-serif'; g.textAlign = 'center'; g.fillText('No data yet', W / 2, H / 2); return; }
+    const { x, y } = this.d, [a, b] = this.v; let lo = Infinity, hi = -Infinity;
+    for (let i = 0; i < x.length; i++) if (x[i] >= a && x[i] <= b) { if (y[i] < lo) lo = y[i]; if (y[i] > hi) hi = y[i]; }
+    if (!(hi > lo)) { lo -= 1; hi += 1; }
+    const pad = (hi - lo) * 0.08; hi += pad; lo = this.o.zero ? 0 : lo - pad;
+    if (this.ymax) { hi = this.ymax; if (!this.o.zero) lo = -this.ymax; }
+    const X = v => L + (v - a) / (b - a) * pw, Y = v => T + (1 - (v - lo) / (hi - lo)) * ph;
+    if (this.shade) { g.fillStyle = 'rgba(31,95,191,.12)'; const s0 = Math.max(a, this.shade[0]), s1 = Math.min(b, this.shade[1]); if (s1 > s0) g.fillRect(X(s0), T, X(s1) - X(s0), ph); }
+    g.font = '11px sans-serif'; g.fillStyle = '#5c6780'; g.strokeStyle = '#e4e8f1'; g.lineWidth = 1;
+    g.textAlign = 'center'; const sx = niceStep((b - a) / 7);
+    for (let v = Math.ceil(a / sx) * sx; v <= b + 1e-9; v += sx) { g.beginPath(); g.moveTo(X(v), T); g.lineTo(X(v), T + ph); g.stroke(); g.fillText(+v.toFixed(3), X(v), T + ph + 14); }
+    g.textAlign = 'right'; const sy = niceStep((hi - lo) / 5);
+    for (let v = Math.ceil(lo / sy) * sy; v <= hi; v += sy) { g.beginPath(); g.moveTo(L, Y(v)); g.lineTo(L + pw, Y(v)); g.stroke(); g.fillText(+v.toFixed(3), L - 5, Y(v) + 4); }
+    g.strokeStyle = '#8892a6'; g.strokeRect(L, T, pw, ph);
+    g.save(); g.beginPath(); g.rect(L, T, pw, ph); g.clip();
+    g.strokeStyle = this.o.color; g.lineWidth = 1.2; g.beginPath(); let st = false;
+    for (let i = 0; i < x.length; i++) { if (x[i] < a - (b - a) * 0.01 || x[i] > b + (b - a) * 0.01) continue; const px = X(x[i]), py = Y(y[i]); st ? g.lineTo(px, py) : g.moveTo(px, py); st = true; }
+    g.stroke(); g.restore();
+    g.fillStyle = '#1c2333'; g.font = '12px sans-serif'; g.textAlign = 'center'; g.fillText(this.o.xl, L + pw / 2, H - 6);
+    g.save(); g.translate(13, T + ph / 2); g.rotate(-Math.PI / 2); g.fillText(this.o.yl, 0, 0); g.restore();
+  }
+}
+const TD = { xl: 'Time (seconds)', yl: 'Amplitude (µV)' }, FD = { xl: 'Frequency (Hz)', yl: 'Magnitude (µV)', zero: true };
+const P = {
+  pT: new Plot('pT', { ...TD, color: '#1f5fbf' }), pS: new Plot('pS', { ...FD, color: '#c0392b' }),
+  pF: new Plot('pF', { ...TD, color: '#1f7a4d' }), pFS: new Plot('pFS', { ...FD, color: '#1f7a4d' }),
+  cT1: new Plot('cT1', { ...TD, color: '#1f5fbf' }), cT2: new Plot('cT2', { ...TD, color: '#1f7a4d' }),
+  cS1: new Plot('cS1', { ...FD, color: '#c0392b' }), cS2: new Plot('cS2', { ...FD, color: '#1f7a4d' })
+};
+
+/* ---------- Data loading ---------- */
+function parseCSV(text, fsDefault) {
+  let fs = null; const t = [], v = [];
+  for (const line of text.split(/\r?\n/)) {
+    const s = line.trim(); if (!s) continue;
+    if (s[0] === '#') { const m = s.match(/fs\s*=\s*([\d.]+)/i); if (m) fs = parseFloat(m[1]); continue; }
+    const p = s.split(/[,;\s]+/).map(Number); if (p.some(isNaN)) continue;
+    if (p.length >= 2) { t.push(p[0]); v.push(p[1]); } else v.push(p[0]);
+  }
+  if (v.length < 64) throw new Error('Not enough numeric samples found.');
+  if (!fs && t.length > 1) fs = 1 / ((t[t.length - 1] - t[0]) / (t.length - 1));
+  return { fs: fs || fsDefault, x: Float64Array.from(v), cols: t.length ? 2 : 1 };
+}
+function ingest(text, label) {
+  const d = parseCSV(text, parseFloat($('fsIn').value) || 256);
+  const myFs = parseFloat($('fsIn').value);
+  S.fs = ($('forceFs').checked && myFs > 0) ? myFs : d.fs; S.x = d.x; S.y = null; S.sp = null; S.fsp = null; S.sx = null; S.sy = null; S.label = label;
+  $('status').textContent = 'Data loaded'; $('status').className = 'badge on';
+  $('dsLabel').textContent = 'Input: Sample/Pre-recorded EEG Signal — ' + label;
+  ['pS', 'pF', 'pFS', 'cT2', 'cS1', 'cS2'].forEach(k => P[k].clear());
+  $('cmp').innerHTML = '<tr><th>Parameter</th><th>Original EEG</th><th>Filtered EEG</th></tr>';
+  $('obs').textContent = 'Apply a filter to generate observations.';
+  clearAnalysis(); showStats(); showTime(); guideMark('load');
+}
+function stats(x, fs) {
+  let mn = Infinity, mx = -Infinity, ss = 0;
+  for (const v of x) { if (v < mn) mn = v; if (v > mx) mx = v; ss += v * v; }
+  return { dur: x.length / fs, n: x.length, min: mn, max: mx, rms: Math.sqrt(ss / x.length) };
+}
+function showStats() {
+  const s = stats(S.x, S.fs), items = [['Duration', s.dur.toFixed(2) + ' s'], ['Sampling frequency', S.fs + ' Hz'], ['Samples', s.n], ['Channels', '1 (single channel)'],
+    ['Min amplitude', s.min.toFixed(2) + ' µV'], ['Max amplitude', s.max.toFixed(2) + ' µV'], ['RMS amplitude', s.rms.toFixed(2) + ' µV']];
+  $('stats').innerHTML = items.map(([k, v]) => `<div class="stat"><b>${v}</b><span>${k}</span></div>`).join('');
+  $('samplingInfo').innerHTML = `Loaded signal: f<sub>s</sub> = ${S.fs} Hz, so T<sub>s</sub> = 1/${S.fs} = ${(1000 / S.fs).toFixed(3)} ms; ${s.n} samples cover ${s.dur.toFixed(2)} s. Nyquist frequency = ${S.fs / 2} Hz.`;
+}
+const timeAxis = n => Array.from({ length: n }, (_, i) => i / S.fs);
+function showTime() { if (!need()) return; const t = timeAxis(S.x.length); P.pT.set(t, S.x); P.cT1.set(t, S.x); }
+function need() { if (!S.x) { alert('Load the sample EEG first.'); return false; } return true; }
+function doFFT() {
+  if (!need()) return; S.sp = spectrum(S.x, S.fs);
+  P.pS.set(S.sp.f, S.sp.m, SPEC_MAX); P.cS1.set(S.sp.f, S.sp.m, SPEC_MAX); guideMark('fft');
+}
+
+/* ---------- Bands & filtering ---------- */
+function selectBand(name) {
+  S.band = name; const [l, h] = BANDS[name]; $('lo').value = l; $('hi').value = h; $('ftype').value = 'bp';
+  document.querySelectorAll('.bands button').forEach(b => b.classList.toggle('active', b.dataset.b === name));
+  $('bandInfo').textContent = `${name}: ${name === 'Gamma' ? '>30 Hz (filter uses 30–80 Hz)' : l + '–' + h + ' Hz'} (approximate convention).`;
+}
+function applyFilter() {
+  if (!need()) return;
+  const type = $('ftype').value, lo = parseFloat($('lo').value), hi = parseFloat($('hi').value), nyq = S.fs / 2;
+  if (type !== 'lp' && !(lo > 0)) return alert('Lower cutoff must be > 0 Hz.');
+  if (type !== 'hp' && !(hi < nyq)) return alert('Upper cutoff must be below the Nyquist frequency (' + nyq + ' Hz).');
+  if (type === 'bp' && !(lo < hi)) return alert('Lower cutoff must be less than upper cutoff.');
+  if (type === 'hp' && !(lo < nyq)) return alert('Cutoff must be below Nyquist.');
+  const mean = S.x.reduce((a, b) => a + b, 0) / S.x.length;
+  const xin = S.x.map(v => v - mean);                      // remove DC to limit start-up transients
+  S.y = filtfilt(xin, design(type, lo, hi, S.fs));
+  S.type = type; S.lo = lo; S.hi = hi;
+  if (!S.sp) doFFT();
+  S.fsp = spectrum(S.y, S.fs);
+  const t = timeAxis(S.y.length), ylim = Math.max(...S.x.map(Math.abs)) * 1.05, mmax = Math.max(...S.sp.m.filter((_, i) => S.sp.f[i] <= SPEC_MAX)) * 1.1;
+  const sh = type === 'bp' ? [lo, hi] : type === 'lp' ? [0, hi] : [lo, SPEC_MAX];
+  P.pF.set(t, S.y); P.pFS.set(S.fsp.f, S.fsp.m, SPEC_MAX); P.pFS.shade = sh;
+  P.cT1.set(t, S.x, null, ylim); P.cT2.set(t, S.y, null, ylim);
+  P.cS1.set(S.sp.f, S.sp.m, SPEC_MAX, mmax); P.cS2.set(S.fsp.f, S.fsp.m, SPEC_MAX, mmax); P.cS2.shade = sh; P.cS1.shade = sh;
+  P.cS1.draw(); P.cS2.draw(); P.pFS.draw();
+  compare(); observe(); guideMark('filter');
+  if (S.energy) calcEnergy(true);
+}
+function compare() {
+  const a = stats(S.x, S.fs), b = stats(S.y, S.fs), amax = s => Math.max(Math.abs(s.min), Math.abs(s.max));
+  const rows = [['Duration', a.dur.toFixed(2) + ' s', b.dur.toFixed(2) + ' s'], ['Sampling Frequency', S.fs + ' Hz', S.fs + ' Hz'], ['Number of Samples', a.n, b.n],
+    ['Maximum Amplitude (|x|)', amax(a).toFixed(2) + ' µV', amax(b).toFixed(2) + ' µV'], ['RMS Amplitude', a.rms.toFixed(2) + ' µV', b.rms.toFixed(2) + ' µV'],
+    ['Dominant Frequency', dominant(S.sp).toFixed(2) + ' Hz', dominant(S.fsp).toFixed(2) + ' Hz']];
+  $('cmp').innerHTML = '<tr><th>Parameter</th><th>Original EEG</th><th>Filtered EEG</th></tr>' + rows.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('');
+}
+function observe() {
+  const a = stats(S.x, S.fs), b = stats(S.y, S.fs), range = S.type === 'bp' ? `${S.lo}–${S.hi} Hz` : S.type === 'lp' ? `below ${S.hi} Hz` : `above ${S.lo} Hz`;
+  const custom = S.type === 'bp' && Object.entries(BANDS).some(([n, r]) => r[0] === S.lo && r[1] === S.hi && n === S.band);
+  const name = custom ? S.band : null, kind = { bp: 'band-pass', lp: 'low-pass', hp: 'high-pass' }[S.type];
+  let txt = name === 'Beta' ? `The filter emphasizes the selected beta-frequency range (${range}) while attenuating frequency components outside the specified passband.`
+    : `The ${kind} filter was configured to retain approximately ${range} components${name ? ' (' + name + ' band)' : ''}. The filtered waveform and its frequency spectrum show the effect of restricting the signal to the selected frequency range.`;
+  txt += ` RMS amplitude changed from ${a.rms.toFixed(2)} µV to ${b.rms.toFixed(2)} µV, and the strongest spectral peak moved from ${dominant(S.sp).toFixed(2)} Hz to ${dominant(S.fsp).toFixed(2)} Hz. These are signal-processing observations only, not medical conclusions.`;
+  $('obs').textContent = txt;
+}
+
+/* ---------- Explanations ---------- */
+const EXPL = {
+  eeg: 'EEG records tiny voltage fluctuations (microvolts) from the scalp using electrodes placed at standard positions. The signals are amplified, sampled by an ADC and stored as numbers. In this lab no electrodes are used; the numbers come from a file.',
+  sampling: 'Sampling measures a continuous signal x(t) every Ts = 1/fs seconds, giving the sequence x[n] = x(nTs). To avoid aliasing, fs must be more than twice the highest frequency present (Nyquist criterion).',
+  fft: 'The FFT is a fast algorithm for the discrete Fourier transform. It expresses x[n] as a sum of sinusoids and returns the magnitude at each frequency k·fs/N, revealing which frequencies are present and how strong they are. Here a Hann window and zero-padding to a power of two are used.',
+  filter: 'A digital filter is a system H that maps x[n] to y[n]. It keeps (passes) chosen frequencies and attenuates others. Here, Butterworth-type biquad sections form high-pass and low-pass stages; cascading them gives a band-pass. Running them forward and backward removes phase delay.'
+};
+document.querySelectorAll('[data-x]').forEach(b => b.onclick = () => { const e = $('explain'); e.hidden = false; e.textContent = EXPL[b.dataset.x]; });
+document.querySelectorAll('[data-reset]').forEach(b => b.onclick = () => P[b.dataset.reset].reset());
+
+/* ---------- Wiring ---------- */
+document.querySelectorAll('.bands').forEach(d => Object.keys(BANDS).forEach(n => { const b = document.createElement('button'); b.textContent = n; b.dataset.b = n; b.onclick = () => selectBand(n); d.appendChild(b); }));
+selectBand('Alpha');
+$('btnLoad').onclick = async () => {
+  if (window.SAMPLE_EEG_CSV) { try { ingest(window.SAMPLE_EEG_CSV, 'data/sample_eeg (bundled demo file)'); } catch (e) { alert(e.message); } return; }
+  try { const r = await fetch('data/sample_eeg.csv'); if (!r.ok) throw 0; ingest(await r.text(), 'data/sample_eeg.csv (bundled demo file)'); }
+  catch (e) { alert('Could not load the sample. Use "Upload CSV" and pick data/sample_eeg.csv.'); }
+};
+$('fileIn').onchange = e => {
+  const f = e.target.files[0]; if (!f) return; const rd = new FileReader();
+  rd.onload = () => { try { ingest(rd.result, f.name + ' (uploaded)'); } catch (err) { alert(err.message); } }; rd.readAsText(f);
+};
+$('btnReset').onclick = () => {
+  S.x = S.y = S.sp = S.fsp = null; Object.values(P).forEach(p => { p.shade = null; p.clear(); });
+  $('stats').innerHTML = ''; $('status').textContent = 'No data loaded'; $('status').className = 'badge off';
+  $('dsLabel').textContent = 'Input: Sample/Pre-recorded EEG Signal (none loaded)'; $('samplingInfo').textContent = 'Load data to see the actual sampling parameters.';
+  $('cmp').innerHTML = '<tr><th>Parameter</th><th>Original EEG</th><th>Filtered EEG</th></tr>'; $('obs').textContent = 'Apply a filter to generate observations.'; selectBand('Alpha'); clearAnalysis(); guideReset();
+};
+$('btnTime').onclick = showTime; $('btnFFT').onclick = doFFT; $('btnFilter').onclick = applyFilter;
+
+/* ---------- Energy (Parseval) ---------- */
+const ENERGY_BANDS = [['Below 0.5 Hz (drift)', 0, 0.5], ['Delta', 0.5, 4], ['Theta', 4, 8], ['Alpha', 8, 13], ['Beta', 13, 30], ['Gamma', 30, 80], ['Above 80 Hz', 80, Infinity]];
+function energyOf(x, fs) {                          // returns time-domain energy and per-band energy, DC removed
+  const n = x.length, Ts = 1 / fs; let N = 1; while (N < n) N <<= 1;
+  const mean = x.reduce((a, b) => a + b, 0) / n, re = new Float64Array(N), im = new Float64Array(N); let et = 0;
+  for (let i = 0; i < n; i++) { re[i] = x[i] - mean; et += re[i] * re[i]; }
+  fft(re, im);
+  const bands = ENERGY_BANDS.map(b => ({ name: b[0], lo: b[1], hi: b[2], e: 0 })), df = fs / N; let ef = 0;
+  for (let k = 1; k <= N / 2; k++) {                // one-sided: bins 1..N/2-1 count twice (negative-frequency mirror)
+    const p = (re[k] * re[k] + im[k] * im[k]) / N * (k < N / 2 ? 2 : 1) * Ts, f = k * df; ef += p;
+    for (const b of bands) if (f >= b.lo && f < b.hi) { b.e += p; break; }
+  }
+  return { time: et * Ts, freq: ef, bands, N };
+}
+const fmtE = v => v >= 1000 ? v.toExponential(3) : v.toFixed(2);
+function calcEnergy(quiet) {
+  if (!need()) return;
+  const ex = energyOf(S.x, S.fs), T = S.x.length / S.fs, n = S.x.length;
+  S.energy = ex; let ey = null;
+  if (S.y) ey = energyOf(S.y, S.fs);
+  const items = [[fmtE(ex.time) + ' µV²·s', 'Total energy (from time samples)'], [fmtE(ex.freq) + ' µV²·s', 'Total energy (from spectrum, Parseval)'],
+    [(ex.time / T).toFixed(2) + ' µV²', 'Average power P = E / T'], [Math.sqrt(ex.time / T).toFixed(2) + ' µV', 'RMS = √P']];
+  if (ey) items.push([fmtE(ey.time) + ' µV²·s', 'Filtered signal energy'], [(100 * ey.time / ex.time).toFixed(1) + ' %', 'Energy kept by the filter']);
+  $('energyStats').innerHTML = items.map(([v, k]) => `<div class="stat"><b>${v}</b><span>${k}</span></div>`).join('');
+  const tot = ex.freq || 1, named = ex.bands.slice(1, 6), top = named.reduce((a, b) => b.e > a.e ? b : a);
+  const rows = ex.bands.map(b => {
+    const pc = 100 * b.e / tot, rng = b.hi === Infinity ? '≥ ' + b.lo + ' Hz' : b.lo + '–' + b.hi + ' Hz';
+    return `<tr><td>${b.name}</td><td>${rng}</td><td>${fmtE(b.e)}</td><td>${pc.toFixed(1)}</td><td class="bar"><i style="width:${Math.max(1, pc).toFixed(1)}%"></i></td></tr>`;
+  }).join('');
+  $('bandTbl').innerHTML = '<tr><th>Band</th><th>Range</th><th>Energy (µV²·s)</th><th>% of total</th><th class="bar">Share</th></tr>' + rows;
+  const TXT = { Delta: 'slow waves, which are normal in deep sleep but are a flag for slowing in an awake adult', Theta: 'drowsy or relaxed activity, normal in light sleep and in children', Alpha: 'relaxed wakefulness, the typical dominant rhythm of an awake, eyes-closed adult', Beta: 'alert or active thinking, but also sedative drug effect or muscle noise', Gamma: 'fast activity, which on the scalp is usually muscle or electrical noise' };
+  $('energyNote').innerHTML = `Most energy is in the <b>${top.name}</b> band (${(100 * top.e / tot).toFixed(1)} %), which is usually linked with ${TXT[top.name]}. The two total-energy values match because energy is the same in the time and frequency domains (Parseval's theorem). ${100 * ex.bands[0].e / tot > 20 ? ` Note: ${(100 * ex.bands[0].e / tot).toFixed(0)} % of the energy lies below 0.5 Hz. That is slow baseline drift rather than a brain rhythm, and a high-pass filter at 0.5 Hz would remove it.` : ''} Samples used: ${n}, T<sub>s</sub> = ${(1000 / S.fs).toFixed(3)} ms. Educational only.`;
+  if (!quiet) guideMark('energy');
+}
+$('btnEnergy').onclick = () => calcEnergy();
+
+/* ---------- Abnormality indicators (educational rules of thumb) ---------- */
+function checkIndicators() {
+  if (!need()) return;
+  const x = S.x, n = x.length, ex = energyOf(x, S.fs), tot = ex.freq || 1, b = ex.bands, sp = spectrum(x, S.fs);
+  const mean = x.reduce((a, c) => a + c, 0) / n, sd = Math.sqrt(x.reduce((a, c) => a + (c - mean) ** 2, 0) / n);
+  const out = [], add = (cls, txt) => out.push(`<li class="${cls}">${txt}</li>`), pc = i => 100 * b[i].e / tot;
+  const slow = pc(1) + pc(2), fast = pc(4) + pc(5), alpha = pc(3), dom = dominant(sp);
+  add('', `<b>Dominant frequency:</b> ${dom.toFixed(2)} Hz. Band shares: delta ${pc(1).toFixed(0)} %, theta ${pc(2).toFixed(0)} %, alpha ${alpha.toFixed(0)} %, beta ${pc(4).toFixed(0)} %, gamma ${pc(5).toFixed(0)} %.`);
+  if (sd < 1) add('flag', '<b>Very low amplitude</b> (standard deviation under 1 µV). In practice this usually means a poor or disconnected electrode, or a wrong unit in the file.');
+  if (slow > 60) add('flag', `<b>Slow-wave dominance:</b> delta + theta hold ${slow.toFixed(0)} % of the energy. Normal in sleep or drowsiness; in an awake adult, persistent slowing is something a specialist would review. Eye blinks can also cause it.`);
+  else add('ok', `<b>Slow waves:</b> delta + theta hold ${slow.toFixed(0)} % of the energy, which is not dominant.`);
+  if (alpha < 10 && slow <= 60) add('flag', `<b>Weak alpha:</b> only ${alpha.toFixed(0)} % of the energy is in 8–13 Hz. Alpha is usually clear with eyes closed and relaxed, but it is normally weak with eyes open or during mental effort.`);
+  else if (alpha >= 10) add('ok', `<b>Alpha present:</b> ${alpha.toFixed(0)} % of the energy is in 8–13 Hz.`);
+  if (fast > 50) add('flag', `<b>Fast-activity dominance:</b> beta + gamma hold ${fast.toFixed(0)} % of the energy. Typical causes are muscle tension, noise or sedative medicines.`);
+  let spikes = 0, prev = -1e9; const lim = 4 * sd;       // isolated samples more than 4 SD from the mean
+  for (let i = 0; i < n; i++) if (Math.abs(x[i] - mean) > lim && i - prev > S.fs * 0.1) { spikes++; prev = i; }
+  if (spikes > 0 && sd >= 1) add('flag', `<b>${spikes} large transient${spikes > 1 ? 's' : ''}</b> found (more than 4 standard deviations from the mean). Spikes and sharp waves are looked for in epilepsy, but electrode pops and movement look similar.`);
+  else if (sd >= 1) add('ok', '<b>No isolated large spikes</b> found (rule: more than 4 standard deviations).');
+  const nyq = S.fs / 2;
+  if (nyq > 55) {
+    let peak = 0, ref = [];
+    for (let i = 0; i < sp.f.length; i++) { const f = sp.f[i]; if (f >= 49 && f <= 51) peak = Math.max(peak, sp.m[i]); else if ((f >= 40 && f < 47) || (f > 53 && f <= 60)) ref.push(sp.m[i]); }
+    ref.sort((a, c) => a - c); const med = ref.length ? ref[ref.length >> 1] : 0;
+    if (med > 0 && peak > 5 * med) add('flag', `<b>50 Hz mains hum</b> is clearly visible (peak about ${(peak / med).toFixed(0)} times the nearby level). This is electrical interference and not brain activity, and a notch filter would remove it.`);
+    else add('ok', '<b>No obvious 50 Hz mains hum.</b>');
+  }
+  add('', '<b>Remember:</b> these are single-channel, rule-of-thumb checks. A real EEG report needs many channels, the person\'s state and age, and an expert reader.');
+  $('indicators').innerHTML = out.join(''); guideMark('check');
+}
+$('btnIndicators').onclick = checkIndicators;
+
+/* ---------- Quick-start guide ---------- */
+const GUIDE = ['reset', 'load', 'fft', 'filter', 'energy', 'check'], done = new Set();
+function guideRender() {
+  let now = true;
+  document.querySelectorAll('#steps li').forEach(li => {
+    const d = done.has(li.dataset.s); li.classList.toggle('done', d);
+    li.classList.toggle('now', !d && now); if (!d) now = false;
+  });
+}
+function guideMark(k) { done.add(k); guideRender(); }
+function guideReset() { done.clear(); done.add('reset'); guideRender(); }
+function clearAnalysis() {
+  S.energy = null; $('energyStats').innerHTML = '';
+  $('bandTbl').innerHTML = '<tr><th>Band</th><th>Range</th><th>Energy (µV²·s)</th><th>% of total</th><th class="bar">Share</th></tr>';
+  $('energyNote').textContent = 'Load a signal and click Calculate Energy.';
+  $('indicators').innerHTML = '<li>Load a signal, then click Check Indicators.</li>';
+  ['fft', 'filter', 'energy', 'check'].forEach(k => done.delete(k)); guideRender();
+}
+document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => { $(b.dataset.go).click(); }));
+guideRender();
+
+</script></body></html>
